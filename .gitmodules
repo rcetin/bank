@@ -1,0 +1,3 @@
+[submodule "src/thirdparty/SQLiteCpp"]
+	path = src/thirdparty/SQLiteCpp
+	url = https://github.com/SRombauts/SQLiteCpp

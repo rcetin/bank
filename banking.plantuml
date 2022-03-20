@@ -1,0 +1,126 @@
+@startuml
+
+package Bank {
+    class Bank {
+    +name: String
+    +location: String
+    +search(in customerId): Customer
+    +openAccount(in accountType): {bool, Customer}
+}
+
+Bank o-- "0..*" Customer
+
+class Login {
+    {static} maxWrongCount: int
+
+    {static} +execute(in User, in cred): bool
+}
+
+class LoginCredentials {
+    -username: String
+    -password: String
+    +setUsername()
+    +setPassword()
+    -IsInputValid()
+}
+
+class User {
+    -id: int
+    -fullname: String
+    -loginCred: LoginCredentials
+    -authorization: authType
+}
+
+enum authType {
+    BASIC
+    ADMIN
+}
+
+User -- authType
+User <|-- Customer
+User *--"1" LoginCredentials
+
+class Customer {    
+    +search(in accountId): Account
+    +compare(in Customer&): bool
+}
+
+Customer *-- "1..*" Account: has
+
+class Account {
+    -id: int
+    -balance: int
+    -type: accountType
+    -txHistory: Transaction
+    -openDate: dateTime
+    -owner: Customer
+    -isBlocked: bool
+
+    -block(in status): bool
+    +id(): int
+    +showAccountDetails(): String
+    +showTxHistory(): String
+    +deposit(in amount): bool
+    +Withdraw(in amount): bool
+}
+
+Account -- accountType
+Account *-- "0..*" Transaction
+
+class Transaction {
+    -id: int
+    -date: dateTime
+    -from: Account
+    -to: Account
+    -description: String
+    -amount: int
+}
+
+Transaction -- dateTime
+
+class dateTime {
+    date: String
+    time: String
+}
+
+enum accountType {
+  BASIC
+  INVESTMENT
+}
+}
+
+package Db {
+    interface database {
+        +write()
+        +read()
+    }
+
+    database <|-- sqliteDb
+
+    sqliteDb -- "0..*" Account
+    sqliteDb -- "0..*" Customer
+    sqliteDb -- "0..*" Transaction
+    sqliteDb -- "0..*" LoginCredentials
+}
+
+package userInput {
+    class input {
+        +data()
+        +isValid()
+        +operator>>()
+    }
+    class args {
+        -schema
+        -parseSchema()
+    }
+    class passwordInput{}
+    class stringInput{}
+
+    input <|-- args
+    input <|-- passwordInput
+    input <|-- stringInput
+}
+
+
+
+@enduml
