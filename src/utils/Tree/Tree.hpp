@@ -8,30 +8,129 @@
 
 #include <Rand/Rand.hpp>
 
+#include <string>
+
 template <typename T>
 class Tree
 {
 public:
-    struct node;
-    class SiblingIterator;
-    // using nodePtr = node*;
-    using treeId = int32_t;
     struct node
     {
-        // treeId id;
+        node(T data_, std::unique_ptr<node> first, std::unique_ptr<node> nextSib)
+            : data(data_)
+            , firstChild(std::move(first))
+            , nextSibling(std::move(nextSib))
+        {
+            std::cout << "Node created with data=" << data << "\n";
+        }
+        ~node()
+        {
+            std::cout << "Node destroyed with data=" << data << "\n";
+        }
+
         T data;
-        node* firstChild;
-        node* nextSibling;
+        std::unique_ptr<node> firstChild;
+        std::unique_ptr<node> nextSibling;
     };
 
-    SiblingIterator childrenOf(node* parent)
+    struct iterator
     {
-        return SiblingIterator{parent->firstChild};
+        iterator(node* node)
+            : node_(node)
+        { }
+
+        node* operator->()
+        {
+            return node_;
+        }
+
+        node& operator*()
+        {
+            return *node_;
+        }
+
+        iterator& operator++(int)
+        {
+            node_ = node_->nextSibling.get();
+            return *this;
+        }
+
+        node* get()
+        {
+            return node_;
+        }
+
+    private:
+        node* node_;
+    };
+
+    void dump()
+    {
+        dfs_traverse(root.get());
     }
 
-    void traverse()
+    node* addRoot(T data)
     {
-        dfs_traverse(root);
+        root = std::make_unique<node>(data, nullptr, nullptr);
+
+        return root.get();
+    }
+
+    node* addChild(node* parentNode, T data)
+    {
+        if(!parentNode->firstChild) {
+            parentNode->firstChild = std::make_unique<node>(data, nullptr, nullptr);
+            return parentNode->firstChild.get();
+        }
+
+        return addSibling(parentNode->firstChild.get(), data);
+    }
+
+    iterator getIteratorToChild(node* parent)
+    {
+        return iterator(parent->firstChild.get());
+    }
+
+    bool haveChild(node* parent)
+    {
+        return parent->firstChild.get() ? true : false;
+    }
+
+private:
+    node* addSibling(node* sibling, T data)
+    {
+        if(!sibling->nextSibling) {
+            sibling->nextSibling = std::make_unique<node>(data, nullptr, nullptr);
+            return sibling->nextSibling.get();
+        }
+
+        return addSibling(sibling->nextSibling.get(), data);
+    }
+
+    node* findNode(node* root, node* targetNode)
+    {
+        if(!root) {
+            return nullptr;
+        }
+
+        if(root == targetNode) {
+            std::cout << "node found\n";
+            return root;
+        }
+
+        std::cout << root->data;
+        if(root->firstChild) {
+            std::cout << "\n";
+        }
+        auto found = findNode(root->firstChild.get(), targetNode);
+        if(found) {
+            return found;
+        }
+        if(root->nextSibling) {
+            std::cout << "--";
+        }
+
+        return findNode(root->nextSibling.get(), targetNode);
     }
 
     void dfs_traverse(node* root)
@@ -41,84 +140,18 @@ public:
         }
 
         std::cout << root->data;
-        if(root->firstChild) {
-            std::cout << "\n";
+        if(root->firstChild.get()) {
+            std::cout << "\n..";
         }
-        dfs_traverse(root->firstChild);
-        if(root->nextSibling) {
-            std::cout << "--";
+        dfs_traverse(root->firstChild.get());
+        if(root->nextSibling.get()) {
+            std::cout << "~";
         }
 
-        dfs_traverse(root->nextSibling);
+        dfs_traverse(root->nextSibling.get());
     }
 
-    void addRoot(T data, node** outNode)
-    {
-        root = new node{data, nullptr, nullptr};
-        if(outNode) {
-            *outNode = root;
-        }
-        return;
-    }
-
-    void addChild(node* parentNode, T data, node** outNode)
-    {
-        if(!parentNode->firstChild) {
-            parentNode->firstChild = new node{data, nullptr, nullptr};
-            if(outNode) {
-                *outNode = parentNode->firstChild;
-            }
-            return;
-        }
-
-        addSibling(&parentNode->firstChild, data, outNode);
-        return;
-    }
-
-    // class SiblingIterator
-    // {
-    // public:
-    //     // Should point the first child
-    //     SiblingIterator(node* n)
-    //         : node_(n)
-    //     { }
-
-    //     SiblingIterator& operator++()
-    //     {
-    //         node_ = node_->nextSibling;
-    //         return *this;
-    //     }
-
-    //     node* operator->()
-    //     {
-    //         return node_;
-    //     }
-
-    //     node& operator*()
-    //     {
-    //         return *node_;
-    //     }
-
-    // private:
-    //     node* node_;
-    // };
-
-private:
-    void addSibling(node** sibling, T data, node** outNode)
-    {
-        if(!(*sibling)) {
-            *sibling = new node{data, nullptr, nullptr};
-            if(outNode) {
-                *outNode = *sibling;
-            }
-            return;
-        }
-
-        addSibling(&((*sibling)->nextSibling), data, outNode);
-    }
-
-    node* root = nullptr;
-    Rand<0, INT32_MAX> rng;
+    std::unique_ptr<node> root = nullptr;
 };
 
 #endif
