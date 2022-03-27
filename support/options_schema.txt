@@ -1,14 +1,14 @@
-1,Unknown Menu
-l,Login
-a,Account Operations
-    o,Create Account
-2,Customer Menu
-a,Account Operations
-    o,Create Account
-    d,Delete Account
-    l,List Accounts
-    t,List Account Details
-c,Customer Operations
-    e,Change Customer Information
-l,Login Operations
-    e,Change Password
+u,Unknown Menu,noOp
+-l,Login,fnLogin
+-a,Account Operations,noOp
+--o,Create Account,fnCreateAccount
+c,Customer Menu,noOp
+-a,Account Operations,noOp
+--o,Create Account,fnCreateAccount
+--d,Delete Account,fnDeleteAccount
+--l,List Accounts,fnListAccounts
+--t,Account Details,fnAccountDetails
+-c,Customer Operations,noOp
+--e,Change Customer Information,fnChangeCustomerInfo
+-l,Login Operations,noOp
+--e,Change Password,fnChangePassword
