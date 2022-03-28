@@ -16,18 +16,14 @@ class Tree
 public:
     struct node
     {
+        friend class Tree;
         node(T data_, std::unique_ptr<node> first, std::unique_ptr<node> nextSib)
             : data(data_)
             , firstChild(std::move(first))
             , nextSibling(std::move(nextSib))
-        {
-            std::cout << "Node created with data=" << data << "\n";
-        }
-        ~node()
-        {
-            std::cout << "Node destroyed with data=" << data << "\n";
-        }
+        { }
 
+    private:
         T data;
         std::unique_ptr<node> firstChild;
         std::unique_ptr<node> nextSibling;
@@ -49,7 +45,16 @@ public:
             return *node_;
         }
 
-        iterator& operator++(int)
+        // postfix
+        iterator operator++(int)
+        {
+            auto it = *this;
+            node_ = node_->nextSibling.get();
+            return it;
+        }
+
+        // prefix
+        iterator& operator++()
         {
             node_ = node_->nextSibling.get();
             return *this;
@@ -67,23 +72,58 @@ public:
     void dump()
     {
         dfs_traverse(root.get());
+        std::cout << "\n";
     }
 
     node* addRoot(T data)
     {
         root = std::make_unique<node>(data, nullptr, nullptr);
-
+        size_++;
         return root.get();
     }
 
     node* addChild(node* parentNode, T data)
     {
+        size_++;
         if(!parentNode->firstChild) {
             parentNode->firstChild = std::make_unique<node>(data, nullptr, nullptr);
             return parentNode->firstChild.get();
         }
 
         return addSibling(parentNode->firstChild.get(), data);
+    }
+
+    bool removeChild(node* parentNode, T data)
+    {
+        if(!parentNode->firstChild) {
+            return false;
+        }
+
+        if((parentNode->firstChild)->data == data) {
+            parentNode->firstChild = std::move((parentNode->firstChild)->nextSibling);
+            size_--;
+            return true;
+        }
+
+        auto prevSibling = parentNode->firstChild.get();
+        auto currentSibling = prevSibling->nextSibling.get();
+        while(currentSibling) {
+            if(currentSibling->data == data) {
+                prevSibling->nextSibling = std::move(currentSibling->nextSibling);
+                currentSibling = nullptr;
+                size_--;
+                return true;
+            }
+            currentSibling = currentSibling->nextSibling.get();
+            prevSibling = prevSibling->nextSibling.get();
+        }
+
+        return false;
+    }
+
+    node* findNode(T data)
+    {
+        return findNodeInternal(root.get(), data);
     }
 
     iterator getIteratorToChild(node* parent)
@@ -94,6 +134,16 @@ public:
     bool haveChild(node* parent)
     {
         return parent->firstChild.get() ? true : false;
+    }
+
+    T data(node* node)
+    {
+        return node->data;
+    }
+
+    std::size_t size()
+    {
+        return size_;
     }
 
 private:
@@ -107,30 +157,22 @@ private:
         return addSibling(sibling->nextSibling.get(), data);
     }
 
-    node* findNode(node* root, node* targetNode)
+    node* findNodeInternal(node* root, T data)
     {
         if(!root) {
             return nullptr;
         }
 
-        if(root == targetNode) {
-            std::cout << "node found\n";
+        if(root->data == data) {
             return root;
         }
 
-        std::cout << root->data;
-        if(root->firstChild) {
-            std::cout << "\n";
-        }
-        auto found = findNode(root->firstChild.get(), targetNode);
+        auto found = findNodeInternal(root->firstChild.get(), data);
         if(found) {
             return found;
         }
-        if(root->nextSibling) {
-            std::cout << "--";
-        }
 
-        return findNode(root->nextSibling.get(), targetNode);
+        return findNodeInternal(root->nextSibling.get(), data);
     }
 
     void dfs_traverse(node* root)
@@ -152,6 +194,7 @@ private:
     }
 
     std::unique_ptr<node> root = nullptr;
+    std::size_t size_ = 0;
 };
 
 #endif
