@@ -2,8 +2,10 @@
 #define USER_SCHEMA_HPP
 
 #include <memory>
+#include <stack>
 #include <string>
-#include <vector>
+
+#include <utils/Tree/Tree.hpp>
 
 class UserSchema
 {
@@ -29,9 +31,13 @@ private:
         std::string description;
         std::string opName;
     };
+    using menuElemTree = Tree<std::string>;
+
+    menuElemTree menuTree;
 
     bool parseSchema(std::ifstream&);
-    bool readSchemaLine(const std::string&);
+    bool readSchemaLine(std::string&, BankSchema&, int32_t& menuLevel);
+    menuElemTree::node* addMenuElementToTree(menuElemTree::node*, const BankSchema&);
 };
 
 /**

@@ -146,3 +146,19 @@ TEST(Tree, findNode)
     auto n = t.addChild(myNode, 12);
     ASSERT_EQ(n, t.findNode(12));
 }
+
+TEST(Tree, getParent)
+{
+    Tree<int> t;
+    Tree<int>::node* root;
+
+    root = t.addRoot(10);
+    t.addChild(root, 12);
+    auto node = t.addChild(root, 15);
+    ASSERT_EQ(t.getParent(node), root);
+
+    t.addChild(node, 151);
+    auto subNode = t.addChild(node, 152);
+    t.addChild(node, 153);
+    ASSERT_EQ(t.getParent(subNode), node);
+}

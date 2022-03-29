@@ -2,6 +2,8 @@
 
 #include <StringInput.hpp>
 
+#include <utils/Tree/Tree.hpp>
+
 const char* default_schema =
     "/home/rcetin/workspace/repos/playground/cpp/bank_management_system/options_schema.txt";
 

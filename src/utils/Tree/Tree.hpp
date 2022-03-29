@@ -4,11 +4,8 @@
 #include <cstdint>
 #include <iostream>
 #include <memory>
-#include <vector>
-
-#include <Rand/Rand.hpp>
-
 #include <string>
+#include <vector>
 
 template <typename T>
 class Tree
@@ -126,6 +123,11 @@ public:
         return findNodeInternal(root.get(), data);
     }
 
+    node* getParent(node* child)
+    {
+        return getParentInternal(root.get(), child);
+    }
+
     iterator getIteratorToChild(node* parent)
     {
         return iterator(parent->firstChild.get());
@@ -173,6 +175,29 @@ private:
         }
 
         return findNodeInternal(root->nextSibling.get(), data);
+    }
+
+    node* getParentInternal(node* root, node* child)
+    {
+        if(!haveChild(root)) {
+            return nullptr;
+        }
+
+        auto it = getIteratorToChild(root);
+        while(it.get()) {
+            if(it.get() == child) {
+                return root;
+            }
+
+            it++;
+        }
+
+        auto node = getParentInternal(root->firstChild.get(), child);
+        if(node) {
+            return node;
+        }
+
+        return getParentInternal(root->firstChild->nextSibling.get(), child);
     }
 
     void dfs_traverse(node* root)
