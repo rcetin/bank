@@ -24,17 +24,17 @@ TEST(SchemaFormat, ExceptionOnWrongFormat)
         "/home/rcetin/workspace/repos/bank_management_system/support/options_schema.txt"};
 }
 
-TEST(UserInput, FailOnWrongOption)
-{
-    FAIL() << "Complete Implementation\n";
-}
+// TEST(UserInput, FailOnWrongOption)
+// {
+//     FAIL() << "Complete Implementation\n";
+// }
 
-TEST(UserInput, SuccessOnCorrectOption)
-{
-    FAIL() << "Complete Implementation\n";
-}
+// TEST(UserInput, SuccessOnCorrectOption)
+// {
+//     FAIL() << "Complete Implementation\n";
+// }
 
-TEST(UserInput, CheckCurrentMenu)
-{
-    FAIL() << "Complete Implementation\n";
-}
+// TEST(UserInput, CheckCurrentMenu)
+// {
+//     FAIL() << "Complete Implementation\n";
+// }

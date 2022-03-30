@@ -30,13 +30,30 @@ private:
         std::string name;
         std::string description;
         std::string opName;
+
+        friend std::ostream& operator<<(std::ostream& o, const BankSchema& schema)
+        {
+            // o << "[name]:" << schema.name << " [desc]:" << schema.description
+            //   << " [opName]:" << schema.opName << "\n";
+            o << schema.description;
+        }
     };
-    using menuElemTree = Tree<std::string>;
+    using menuElemTree = Tree<BankSchema>;
 
     menuElemTree menuTree;
 
     bool parseSchema(std::ifstream&);
-    bool readSchemaLine(std::string&, BankSchema&, int32_t& menuLevel);
+
+    /**
+     * @brief 
+     * 
+     * @param str Line to read
+     * @param lineSchema [out] line schema output 
+     * @param menuLevel [out] menu level of the line
+     * @return true line is parsed successfully
+     * @return false parsing is failed
+     */
+    bool readSchemaLine(std::string& str, BankSchema& lineSchema, int32_t& menuLevel);
     menuElemTree::node* addMenuElementToTree(menuElemTree::node*, const BankSchema&);
 };
 

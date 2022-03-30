@@ -27,7 +27,9 @@ std::string UserSchema::listSubmenuElements() { }
 
 UserSchema::menuElemTree::node* UserSchema::addMenuElementToTree(menuElemTree::node* parent,
                                                                  const BankSchema& lineSchema)
-{ }
+{
+    return menuTree.addChild(parent, lineSchema);
+}
 
 bool UserSchema::parseSchema(std::ifstream& stream)
 {
@@ -36,21 +38,35 @@ bool UserSchema::parseSchema(std::ifstream& stream)
     std::string line;
     BankSchema lineSchema;
     int32_t menuLevel;
-    menuElemTree::node* parent;
-    int32_t parentMenuLevel;
+    menuElemTree::node* root;
+    menuElemTree::node* node;
+    int32_t nodeMenuLevel;
+    bool ret;
 
-    parent = menuTree.addRoot("Menu");
-    parentMenuLevel = -1;
+    root = menuTree.addRoot({"Menu", "Initial Menu", "noOp"});
 
+    node = root;
+    nodeMenuLevel = -1;
     while(!stream.eof()) {
         std::getline(stream, line);
-        readSchemaLine(line, lineSchema, menuLevel);
-        // parent = (menuLevel < parentMenuLevel)
-        // addMenuElementToTree(menuStack, lineSchema);
-        /**
-         * if level is same with above put current node to the same parent with previous node
-         * if level is greater than previous, put current node to the previous node as child
-         */
+        ret = readSchemaLine(line, lineSchema, menuLevel);
+        if(!ret) {
+            return false;
+        }
+
+        auto parent =
+            (!menuLevel) ? root : ((menuLevel > nodeMenuLevel) ? node : menuTree.getParent(node));
+        if(parent == nullptr) {
+            return false;
+        }
+
+        node = addMenuElementToTree(parent, lineSchema);
+        if(node == nullptr) {
+            return false;
+        }
+        nodeMenuLevel = menuLevel;
+
+        menuTree.dump();
     }
 }
 
@@ -74,4 +90,6 @@ bool UserSchema::readSchemaLine(std::string& str, BankSchema& lineSchema, int32_
 
     std::getline(stream, lineSchema.opName, ',');
     std::cout << "lineSchema.opName: " << lineSchema.opName << '\n';
+
+    return true;
 }

@@ -188,16 +188,14 @@ private:
             if(it.get() == child) {
                 return root;
             }
-
+            auto node = getParentInternal(it.get(), child);
+            if(node) {
+                return node;
+            }
             it++;
         }
 
-        auto node = getParentInternal(root->firstChild.get(), child);
-        if(node) {
-            return node;
-        }
-
-        return getParentInternal(root->firstChild->nextSibling.get(), child);
+        return nullptr;
     }
 
     void dfs_traverse(node* root)
@@ -205,16 +203,10 @@ private:
         if(!root) {
             return;
         }
-
-        std::cout << root->data;
-        if(root->firstChild.get()) {
-            std::cout << "\n..";
-        }
+        auto parent = getParent(root);
+        std::cout << "node=" << root << ", data=" << root->data << ", parent=" << parent << ", "
+                  << (parent ? parent->data : T{}) << "\n";
         dfs_traverse(root->firstChild.get());
-        if(root->nextSibling.get()) {
-            std::cout << "~";
-        }
-
         dfs_traverse(root->nextSibling.get());
     }
 

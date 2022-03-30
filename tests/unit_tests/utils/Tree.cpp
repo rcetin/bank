@@ -123,8 +123,9 @@ TEST(Tree, removeNode)
     t.addChild(myNode, 12);
     t.addChild(myNode, 15);
     auto n = t.addChild(myNode, 17);
-    t.addChild(n, 171);
+    auto child = t.addChild(n, 171);
     t.addChild(n, 172);
+    ASSERT_EQ(t.getParent(child), n);
     t.dump();
 
     ASSERT_TRUE(t.removeChild(myNode, 17));
