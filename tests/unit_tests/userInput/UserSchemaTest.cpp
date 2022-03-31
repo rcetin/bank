@@ -20,8 +20,26 @@ TEST(SchemaOpen, ExceptionOnWrongFile)
 
 TEST(SchemaFormat, ExceptionOnWrongFormat)
 {
-    UserSchema schema{
-        "/home/rcetin/workspace/repos/bank_management_system/support/options_schema.txt"};
+    EXPECT_THROW(
+        {
+            try {
+                UserSchema schema{"/home/rcetin/workspace/repos/bank_management_system/tests/"
+                                  "unit_tests/userInput/"
+                                  "test_options_schema.txt"};
+            }
+            catch(const std::exception& e) {
+                EXPECT_STREQ("Schema format error", e.what());
+                throw;
+            }
+        },
+        UserSchema::SchemaError);
+}
+
+TEST(SchemaFormat, SucceedOnCorrectFormat)
+{
+
+    EXPECT_NO_THROW(UserSchema schema{"/home/rcetin/workspace/repos/bank_management_system/support/"
+                                      "options_schema.txt"});
 }
 
 // TEST(UserInput, FailOnWrongOption)

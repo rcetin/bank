@@ -1,0 +1,14 @@
+u,Unknown Menu,noOp
+-l,Login,fnLogin
+-a,Account Operations,,noOp
+--o,Create Account,fnCreateAccount
+c,Customer Menu,noOp
+-a,Account Operations,noOp
+--o,Create Account,fnCreateAccount
+--d,Delete Account,fnDeleteAccount
+--l,List Accounts,fnListAccounts
+--t,Account Details,fnAccountDetails
+-c,Customer Operations,noOp
+--e,Change Customer Information,fnChangeCustomerInfo
+-l,Login Operations,noOp
+--e,Change Password,fnChangePassword

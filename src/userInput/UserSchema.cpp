@@ -17,18 +17,30 @@ UserSchema::UserSchema(const std::string& filename)
         throw SchemaError{"Schema File could not be opened..."};
     }
 
-    parseSchema(schemaFile);
+    if(!parseSchema(schemaFile)) {
+        throw SchemaError{"Schema format error"};
+    }
 }
 
-bool UserSchema::searchOption(char) { }
-std::string UserSchema::getDescription(char) { }
-std::string UserSchema::getCurrentOp(void) { }
-std::string UserSchema::listSubmenuElements() { }
+bool UserSchema::isOptionValid(char) { }
+std::string UserSchema::getOptionDescription(char) { }
+std::string UserSchema::getCurrentOperation(void) { }
+std::string UserSchema::listCurrentMenu() { }
 
-UserSchema::menuElemTree::node* UserSchema::addMenuElementToTree(menuElemTree::node* parent,
-                                                                 const BankSchema& lineSchema)
+UserSchema::menuElemTree::node*
+UserSchema::addMenuElementToTree(std::stack<menuElemStackElem> schemaStack,
+                                 const BankSchema& lineSchema)
 {
-    return menuTree.addChild(parent, lineSchema);
+    menuElemTree::node* parent = nullptr;
+    while(!schemaStack.empty()) {
+        const menuElemStackElem& sc = schemaStack.top();
+        if(sc.first.menuLevel == (lineSchema.menuLevel - 1)) {
+            parent = sc.second;
+            break;
+        }
+        schemaStack.pop();
+    }
+    return (parent) ? menuTree.addChild(parent, lineSchema) : nullptr;
 }
 
 bool UserSchema::parseSchema(std::ifstream& stream)
@@ -37,59 +49,48 @@ bool UserSchema::parseSchema(std::ifstream& stream)
 
     std::string line;
     BankSchema lineSchema;
-    int32_t menuLevel;
-    menuElemTree::node* root;
+    std::stack<menuElemStackElem> schemaStack;
     menuElemTree::node* node;
-    int32_t nodeMenuLevel;
     bool ret;
 
-    root = menuTree.addRoot({"Menu", "Initial Menu", "noOp"});
+    BankSchema r{"Menu", "Initial Menu", "noOp", -1};
+    node = menuTree.addRoot(r);
+    schemaStack.push(menuElemStackElem{r, node});
 
-    node = root;
-    nodeMenuLevel = -1;
     while(!stream.eof()) {
+        // TODO: Implement stack to add children to correct parents!
         std::getline(stream, line);
-        ret = readSchemaLine(line, lineSchema, menuLevel);
+        ret = parseSchemaLine(line, lineSchema);
         if(!ret) {
             return false;
         }
 
-        auto parent =
-            (!menuLevel) ? root : ((menuLevel > nodeMenuLevel) ? node : menuTree.getParent(node));
-        if(parent == nullptr) {
-            return false;
-        }
-
-        node = addMenuElementToTree(parent, lineSchema);
+        node = addMenuElementToTree(schemaStack, lineSchema);
         if(node == nullptr) {
             return false;
         }
-        nodeMenuLevel = menuLevel;
-
-        menuTree.dump();
+        schemaStack.push(menuElemStackElem{lineSchema, node});
     }
+    menuTree.dump();
+    return true;
 }
 
-bool UserSchema::readSchemaLine(std::string& str, BankSchema& lineSchema, int32_t& menuLevel)
+bool UserSchema::parseSchemaLine(std::string& str, BankSchema& lineSchema)
 {
     std::string lineElem;
-    std::cout << "Enter: " << str << '\n';
 
-    menuLevel = std::count(str.begin(), str.end(), '-');
-    std::cout << "Menu Level: " << menuLevel << '\n';
+    const int32_t commaCount = std::count(str.begin(), str.end(), ',');
+    if(commaCount != 2) {
+        std::cout << "Comma count " << commaCount << "\n";
+        return false;
+    }
 
-    str.erase(0, menuLevel); // exclude '-'
-    std::cout << "Line - excluded: " << str << '\n';
-
+    lineSchema.menuLevel = std::count(str.begin(), str.end(), '-');
+    str.erase(0, lineSchema.menuLevel); // exclude '-'
     std::stringstream stream{str};
     std::getline(stream, lineSchema.name, ',');
-    std::cout << "lineSchema.name: " << lineSchema.name << '\n';
-
     std::getline(stream, lineSchema.description, ',');
-    std::cout << "lineSchema.description: " << lineSchema.description << '\n';
-
     std::getline(stream, lineSchema.opName, ',');
-    std::cout << "lineSchema.opName: " << lineSchema.opName << '\n';
 
     return true;
 }
