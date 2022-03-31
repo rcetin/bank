@@ -46,7 +46,7 @@ public:
         return stream >> input.data_;
     }
 
-    friend std::ostream& operator<<(std::ostream& stream, PasswordInput& input)
+    friend std::ostream& operator<<(std::ostream& stream, const PasswordInput& input)
     {
         return stream << std::string(input.data_.length(), '*');
     }

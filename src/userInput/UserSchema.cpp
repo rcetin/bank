@@ -78,19 +78,30 @@ bool UserSchema::parseSchema(std::ifstream& stream)
 bool UserSchema::parseSchemaLine(std::string& str, BankSchema& lineSchema)
 {
     std::string lineElem;
+    std::string key;
+    std::string description;
+    std::string operation;
 
     const int32_t commaCount = std::count(str.begin(), str.end(), ',');
     if(commaCount != 2) {
-        std::cout << "Comma count " << commaCount << "\n";
         return false;
     }
 
     lineSchema.menuLevel = std::count(str.begin(), str.end(), '-');
     str.erase(0, lineSchema.menuLevel); // exclude '-'
     std::stringstream stream{str};
-    std::getline(stream, lineSchema.name, ',');
-    std::getline(stream, lineSchema.description, ',');
-    std::getline(stream, lineSchema.opName, ',');
+    std::getline(stream, key, ',');
+    std::getline(stream, description, ',');
+    std::getline(stream, operation, ',');
+
+    lineSchema.key = key;
+    lineSchema.description = description;
+    lineSchema.operation = operation;
+
+    if(!lineSchema.key.isValid() || !lineSchema.description.isValid() ||
+       !lineSchema.operation.isValid()) {
+        return false;
+    }
 
     return true;
 }

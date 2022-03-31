@@ -24,7 +24,7 @@ public:
 
     virtual bool isValid() const override
     {
-        const std::regex stringSchema{"[a-zA-Z]+"};
+        const std::regex stringSchema{"[a-zA-Z\\s]+"};
         return std::regex_match(data_, stringSchema);
     }
 
@@ -33,7 +33,7 @@ public:
         return stream >> input.data_;
     }
 
-    friend std::ostream& operator<<(std::ostream& stream, StringInput& input)
+    friend std::ostream& operator<<(std::ostream& stream, const StringInput& input)
     {
         return stream << input.data_;
     }

@@ -34,7 +34,7 @@ public:
         return stream >> input.data_;
     }
 
-    friend std::ostream& operator<<(std::ostream& stream, CharInput& input)
+    friend std::ostream& operator<<(std::ostream& stream, const CharInput& input)
     {
         return stream << input.data_;
     }
