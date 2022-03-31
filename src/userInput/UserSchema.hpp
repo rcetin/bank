@@ -44,19 +44,12 @@ private:
     using menuElemStackElem = std::pair<BankSchema, menuElemTree::node*>;
 
     menuElemTree menuTree;
+    menuElemTree::node* currentParentMenuElem = nullptr;
 
     bool parseSchema(std::ifstream&);
     bool parseSchemaLine(std::string& str, BankSchema& lineSchema);
     menuElemTree::node* addMenuElementToTree(std::stack<menuElemStackElem> schemaStack,
                                              const BankSchema& lineSchema);
 };
-
-/**
- * menuList
- *  menuItem1
- *      menuSubItem
- * 
- * 
- */
 
 #endif

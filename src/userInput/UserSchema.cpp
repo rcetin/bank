@@ -7,7 +7,8 @@
 #include <stack>
 #include <string>
 
-#include <UserSchema.hpp>
+#include <userInput/CharInput.hpp>
+#include <userInput/UserSchema.hpp>
 
 UserSchema::UserSchema(const std::string& filename)
 {
@@ -20,9 +21,37 @@ UserSchema::UserSchema(const std::string& filename)
     if(!parseSchema(schemaFile)) {
         throw SchemaError{"Schema format error"};
     }
+
+    currentParentMenuElem = menuTree.getRoot();
 }
 
-bool UserSchema::isOptionValid(char) { }
+bool UserSchema::isOptionValid(char userOption)
+{
+    CharInput charI{userOption};
+
+    if(!currentParentMenuElem) {
+        std::cout << "CurrentPArent is nullptr\n";
+        return false;
+    }
+
+    if(!charI.isValid()) {
+        std::cout << "charInput is invalid\n";
+        return false;
+    }
+
+    auto it = menuTree.getIteratorToChild(currentParentMenuElem);
+    std::cout << "Testing charInput: " << charI << "\n";
+    while(it.get()) {
+        std::cout << "Got child opt: " << it->data().key << "\n";
+        if(it->data().key == charI) {
+            return true;
+        }
+        it++;
+    }
+
+    return false;
+}
+
 std::string UserSchema::getOptionDescription(char) { }
 std::string UserSchema::getCurrentOperation(void) { }
 std::string UserSchema::listCurrentMenu() { }
@@ -58,7 +87,6 @@ bool UserSchema::parseSchema(std::ifstream& stream)
     schemaStack.push(menuElemStackElem{r, node});
 
     while(!stream.eof()) {
-        // TODO: Implement stack to add children to correct parents!
         std::getline(stream, line);
         ret = parseSchemaLine(line, lineSchema);
         if(!ret) {

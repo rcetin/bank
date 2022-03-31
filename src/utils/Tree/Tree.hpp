@@ -15,13 +15,18 @@ public:
     {
         friend class Tree;
         node(T data_, std::unique_ptr<node> first, std::unique_ptr<node> nextSib)
-            : data(data_)
+            : data_(data_)
             , firstChild(std::move(first))
             , nextSibling(std::move(nextSib))
         { }
 
+        T data(void)
+        {
+            return data_;
+        }
+
     private:
-        T data;
+        T data_;
         std::unique_ptr<node> firstChild;
         std::unique_ptr<node> nextSibling;
     };
@@ -96,7 +101,7 @@ public:
             return false;
         }
 
-        if((parentNode->firstChild)->data == data) {
+        if((parentNode->firstChild)->data_ == data) {
             parentNode->firstChild = std::move((parentNode->firstChild)->nextSibling);
             size_--;
             return true;
@@ -105,7 +110,7 @@ public:
         auto prevSibling = parentNode->firstChild.get();
         auto currentSibling = prevSibling->nextSibling.get();
         while(currentSibling) {
-            if(currentSibling->data == data) {
+            if(currentSibling->data_ == data) {
                 prevSibling->nextSibling = std::move(currentSibling->nextSibling);
                 currentSibling = nullptr;
                 size_--;
@@ -128,6 +133,11 @@ public:
         return getParentInternal(root.get(), child);
     }
 
+    node* getRoot(void)
+    {
+        return root.get();
+    }
+
     iterator getIteratorToChild(node* parent)
     {
         return iterator(parent->firstChild.get());
@@ -140,7 +150,7 @@ public:
 
     T data(node* node)
     {
-        return node->data;
+        return node->data_;
     }
 
     std::size_t size()
@@ -165,7 +175,7 @@ private:
             return nullptr;
         }
 
-        if(root->data == data) {
+        if(root->data_ == data) {
             return root;
         }
 
@@ -204,8 +214,8 @@ private:
             return;
         }
         auto parent = getParent(root);
-        std::cout << "node=" << root << ", data=" << root->data << ", parent=" << parent << ", "
-                  << (parent ? parent->data : T{}) << "\n";
+        std::cout << "node=" << root << ", data=" << root->data_ << ", parent=" << parent << ", "
+                  << (parent ? parent->data_ : T{}) << "\n";
         dfs_traverse(root->firstChild.get());
         dfs_traverse(root->nextSibling.get());
     }

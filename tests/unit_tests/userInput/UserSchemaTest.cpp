@@ -42,15 +42,21 @@ TEST(SchemaFormat, SucceedOnCorrectFormat)
                                       "options_schema.txt"});
 }
 
-// TEST(UserInput, FailOnWrongOption)
-// {
-//     FAIL() << "Complete Implementation\n";
-// }
+TEST(UserInput, FailOnWrongOption)
+{
+    UserSchema schema{"/home/rcetin/workspace/repos/bank_management_system/support/"
+                      "options_schema.txt"};
 
-// TEST(UserInput, SuccessOnCorrectOption)
-// {
-//     FAIL() << "Complete Implementation\n";
-// }
+    EXPECT_FALSE(schema.isOptionValid('x'));
+}
+
+TEST(UserInput, SuccessOnCorrectOption)
+{
+    UserSchema schema{"/home/rcetin/workspace/repos/bank_management_system/support/"
+                      "options_schema.txt"};
+
+    EXPECT_TRUE(schema.isOptionValid('u'));
+}
 
 // TEST(UserInput, CheckCurrentMenu)
 // {

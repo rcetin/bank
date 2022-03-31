@@ -4,7 +4,8 @@
 
 TEST(BasicChar, SuccessOnCorrectData)
 {
-    std::vector<std::pair<CharInput, char>> testVector = {{"a", 'a'}, {"Z", 'Z'}, {"b", 'b'}};
+    std::vector<std::pair<CharInput, char>> testVector = {
+        {"a", 'a'}, {"Z", 'Z'}, {"b", 'b'}, {CharInput('a'), 'a'}};
 
     for(auto charInput : testVector) {
         EXPECT_TRUE(charInput.first.isValid());

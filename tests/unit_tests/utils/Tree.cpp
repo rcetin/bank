@@ -163,3 +163,18 @@ TEST(Tree, getParent)
     t.addChild(node, 153);
     ASSERT_EQ(t.getParent(subNode), node);
 }
+
+TEST(Tree, getRoot)
+{
+    Tree<int> t;
+    Tree<int>::node* root;
+
+    root = t.addRoot(10);
+    t.addChild(root, 12);
+    auto node = t.addChild(root, 15);
+
+    t.addChild(node, 151);
+    t.addChild(node, 152);
+    t.addChild(node, 153);
+    ASSERT_EQ(t.getRoot(), root);
+}
