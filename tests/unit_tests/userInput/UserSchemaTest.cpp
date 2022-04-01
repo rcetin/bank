@@ -58,7 +58,26 @@ TEST(UserInput, SuccessOnCorrectOption)
     EXPECT_TRUE(schema.isOptionValid('u'));
 }
 
-// TEST(UserInput, CheckCurrentMenu)
-// {
-//     FAIL() << "Complete Implementation\n";
-// }
+TEST(UserInput, SuccessOnDifferentMenuLevels)
+{
+    UserSchema schema{"/home/rcetin/workspace/repos/bank_management_system/support/"
+                      "options_schema.txt"};
+
+    EXPECT_TRUE(schema.processUserInput('u'));
+    EXPECT_TRUE(schema.processUserInput('a'));
+    EXPECT_TRUE(schema.processUserInput('o'));
+}
+
+TEST(UserInput, FailOnDifferentMenuLevels)
+{
+    UserSchema schema{"/home/rcetin/workspace/repos/bank_management_system/support/"
+                      "options_schema.txt"};
+
+    schema.dumpCurrentMenu(std::cout);
+    EXPECT_TRUE(schema.processUserInput('c'));
+    schema.dumpCurrentMenu(std::cout);
+    EXPECT_TRUE(schema.processUserInput('a'));
+    schema.dumpCurrentMenu(std::cout);
+    EXPECT_FALSE(schema.processUserInput('c'));
+    schema.dumpCurrentMenu(std::cout);
+}

@@ -18,9 +18,7 @@ public:
     { }
     CharInput(char charStr)
         : data_(std::string(1, charStr))
-    {
-        std::cout << "init from char: " << data_ << "\n";
-    }
+    { }
 
     virtual char data() const override
     {
@@ -30,7 +28,6 @@ public:
     virtual bool isValid() const override
     {
         const std::regex optionCharacter{R"(^[a-zA-Z]{1}$)"};
-        std::cout << "Check validiry of charInput: " << data_ << "\n";
         return std::regex_match(data_, optionCharacter);
     }
 

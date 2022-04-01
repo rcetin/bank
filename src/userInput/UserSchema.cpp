@@ -30,19 +30,15 @@ bool UserSchema::isOptionValid(char userOption)
     CharInput charI{userOption};
 
     if(!currentParentMenuElem) {
-        std::cout << "CurrentPArent is nullptr\n";
         return false;
     }
 
     if(!charI.isValid()) {
-        std::cout << "charInput is invalid\n";
         return false;
     }
 
     auto it = menuTree.getIteratorToChild(currentParentMenuElem);
-    std::cout << "Testing charInput: " << charI << "\n";
     while(it.get()) {
-        std::cout << "Got child opt: " << it->data().key << "\n";
         if(it->data().key == charI) {
             return true;
         }
@@ -52,9 +48,48 @@ bool UserSchema::isOptionValid(char userOption)
     return false;
 }
 
-std::string UserSchema::getOptionDescription(char) { }
-std::string UserSchema::getCurrentOperation(void) { }
-std::string UserSchema::listCurrentMenu() { }
+bool UserSchema::processUserInput(char userOption)
+{
+    CharInput charI{userOption};
+    if(!isOptionValid(userOption)) {
+        return false;
+    }
+
+    auto it = menuTree.getIteratorToChild(currentParentMenuElem);
+    while(it.get()) {
+        if(it->data().key == charI) {
+            currentParentMenuElem = it.get();
+            return true;
+        }
+        it++;
+    }
+
+    return false;
+}
+
+std::string UserSchema::getCurrentOptionDescription(void)
+{
+    return currentParentMenuElem->data().description.data();
+}
+
+std::string UserSchema::getCurrentOperation(void)
+{
+    return currentParentMenuElem->data().operation.data();
+}
+
+void UserSchema::dumpCurrentMenu(std::ostream& out)
+{
+    out << "[key] [Description]\n";
+    out << "-----------------------------\n";
+    out << "[" << currentParentMenuElem->data().key << "] ["
+        << currentParentMenuElem->data().description << "]\n";
+
+    auto it = menuTree.getIteratorToChild(currentParentMenuElem);
+    while(it.get()) {
+        out << "\t[" << it->data().key << "] [" << it->data().description << "]\n";
+        it++;
+    }
+}
 
 UserSchema::menuElemTree::node*
 UserSchema::addMenuElementToTree(std::stack<menuElemStackElem> schemaStack,
@@ -82,7 +117,7 @@ bool UserSchema::parseSchema(std::ifstream& stream)
     menuElemTree::node* node;
     bool ret;
 
-    BankSchema r{"Menu", "Initial Menu", "noOp", -1};
+    BankSchema r{"", "Initial Menu", "noOp", -1};
     node = menuTree.addRoot(r);
     schemaStack.push(menuElemStackElem{r, node});
 

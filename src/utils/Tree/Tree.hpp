@@ -210,12 +210,13 @@ private:
 
     void dfs_traverse(node* root)
     {
+        static int32_t cnt = 0;
         if(!root) {
             return;
         }
         auto parent = getParent(root);
-        std::cout << "node=" << root << ", data=" << root->data_ << ", parent=" << parent << ", "
-                  << (parent ? parent->data_ : T{}) << "\n";
+        std::cout << "Node:[" << root << "]->data:[" << root->data_ << "] Parent:[" << parent
+                  << "]->data[" << (parent ? parent->data_ : T{}) << "]\n";
         dfs_traverse(root->firstChild.get());
         dfs_traverse(root->nextSibling.get());
     }

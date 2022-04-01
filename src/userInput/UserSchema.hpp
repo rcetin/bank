@@ -15,9 +15,9 @@ public:
     UserSchema(const std::string&);
     bool isOptionValid(char);
     bool processUserInput(char);
-    std::string getOptionDescription(char);
+    std::string getCurrentOptionDescription(void);
     std::string getCurrentOperation(void);
-    std::string listCurrentMenu();
+    void dumpCurrentMenu(std::ostream&);
 
     class SchemaError : public std::runtime_error
     {
@@ -37,7 +37,8 @@ private:
 
         friend std::ostream& operator<<(std::ostream& o, const BankSchema& schema)
         {
-            o << schema.description;
+            o << "[" << schema.key << ", " << schema.description << "]";
+            return o;
         }
     };
     using menuElemTree = Tree<BankSchema>;
