@@ -1,3 +1,6 @@
 [submodule "src/thirdparty/SQLiteCpp"]
 	path = src/thirdparty/SQLiteCpp
 	url = https://github.com/SRombauts/SQLiteCpp
+[submodule "src/thirdparty/PicoSHA2"]
+	path = src/thirdparty/PicoSHA2
+	url = https://github.com/okdshin/PicoSHA2.git

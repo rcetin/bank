@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include <userInput/UserSchema.hpp>
+#include <userOperations/Credentials/Credentials.hpp>
 #include <userOperations/UserOps.hpp>
 
 const char* default_schema =

@@ -103,7 +103,7 @@ package Db {
     sqliteDb -- "0..*" LoginCredentials
 }
 
-package userInput {
+package dataTypes {
     class input {
         +data()
         +isValid()
