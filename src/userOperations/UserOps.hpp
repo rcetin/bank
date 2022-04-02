@@ -9,6 +9,10 @@ class UserOps
 public:
     void run(const std::string& op)
     {
+        if(op == "noOp") {
+            return;
+        }
+
         ops.at(op)();
     }
 
