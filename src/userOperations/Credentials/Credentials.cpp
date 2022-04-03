@@ -1,11 +1,11 @@
 #include <thirdparty/PicoSHA2/picosha2.h>
 #include <userInput/PasswordInput.hpp>
-#include <userInput/StringInput.hpp>
+#include <userInput/UsernameInput.hpp>
 #include <userOperations/Credentials/Credentials.hpp>
 
 bool Credentials::setUsername(const std::string& u)
 {
-    StringInput username{u};
+    UsernameInput username{u};
 
     if(!username.isValid()) {
         return false;

@@ -4,7 +4,7 @@
 #include <string>
 
 #include <userInput/PasswordInput.hpp>
-#include <userInput/StringInput.hpp>
+#include <userInput/UsernameInput.hpp>
 
 class Credentials
 {
@@ -15,11 +15,9 @@ public:
     std::string password(void); // hash
 
 private:
-    bool isPasswordValid(const StringInput&);
-    bool isUsernameValid(const PasswordInput&);
     bool hash(std::string&);
 
-    StringInput username_;
+    UsernameInput username_;
     std::string passwordHash_;
 };
 

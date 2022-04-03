@@ -8,5 +8,6 @@ target_sources(testing PRIVATE
     IntegerInputTest.cpp
     UserSchemaTest.cpp
     CharInputTest.cpp
+    UsernameInputTest.cpp
     ${PROJECT_SOURCE_DIR}/src/userInput/UserSchema.cpp
 )
