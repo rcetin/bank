@@ -23,7 +23,7 @@ TEST(SchemaFormat, ExceptionOnWrongFormat)
     EXPECT_THROW(
         {
             try {
-                UserSchema schema{"/home/rcetin/workspace/repos/bank_management_system/tests/"
+                UserSchema schema{"/home/rcetin/workspace/repos/bank/tests/"
                                   "unit_tests/userInput/"
                                   "test_options_schema.txt"};
             }
@@ -38,13 +38,13 @@ TEST(SchemaFormat, ExceptionOnWrongFormat)
 TEST(SchemaFormat, SucceedOnCorrectFormat)
 {
 
-    EXPECT_NO_THROW(UserSchema schema{"/home/rcetin/workspace/repos/bank_management_system/support/"
+    EXPECT_NO_THROW(UserSchema schema{"/home/rcetin/workspace/repos/bank/support/"
                                       "options_schema.txt"});
 }
 
 TEST(UserInput, FailOnWrongOption)
 {
-    UserSchema schema{"/home/rcetin/workspace/repos/bank_management_system/support/"
+    UserSchema schema{"/home/rcetin/workspace/repos/bank/support/"
                       "options_schema.txt"};
 
     EXPECT_FALSE(schema.isOptionValid('x'));
@@ -52,7 +52,7 @@ TEST(UserInput, FailOnWrongOption)
 
 TEST(UserInput, SuccessOnCorrectOption)
 {
-    UserSchema schema{"/home/rcetin/workspace/repos/bank_management_system/support/"
+    UserSchema schema{"/home/rcetin/workspace/repos/bank/support/"
                       "options_schema.txt"};
 
     EXPECT_TRUE(schema.isOptionValid('u'));
@@ -60,7 +60,7 @@ TEST(UserInput, SuccessOnCorrectOption)
 
 TEST(UserInput, SuccessOnDifferentMenuLevels)
 {
-    UserSchema schema{"/home/rcetin/workspace/repos/bank_management_system/support/"
+    UserSchema schema{"/home/rcetin/workspace/repos/bank/support/"
                       "options_schema.txt"};
 
     EXPECT_TRUE(schema.processUserInput('u'));
@@ -70,7 +70,7 @@ TEST(UserInput, SuccessOnDifferentMenuLevels)
 
 TEST(UserInput, FailOnDifferentMenuLevels)
 {
-    UserSchema schema{"/home/rcetin/workspace/repos/bank_management_system/support/"
+    UserSchema schema{"/home/rcetin/workspace/repos/bank/support/"
                       "options_schema.txt"};
 
     schema.dumpCurrentMenu(std::cout);

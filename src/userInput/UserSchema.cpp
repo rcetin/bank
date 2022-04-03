@@ -134,7 +134,7 @@ bool UserSchema::parseSchema(std::ifstream& stream)
         }
         schemaStack.push(menuElemStackElem{lineSchema, node});
     }
-    menuTree.dump();
+    // menuTree.dump();
     return true;
 }
 

@@ -4,8 +4,7 @@
 #include <userOperations/Credentials/Credentials.hpp>
 #include <userOperations/UserOps.hpp>
 
-const char* default_schema =
-    "/home/rcetin/workspace/repos/bank_management_system/support/options_schema.txt";
+const char* default_schema = "/home/rcetin/workspace/repos/bank/support/options_schema.txt";
 
 void welcome(void)
 {
