@@ -9,13 +9,7 @@
 class UsernameInput : public Input<std::string>
 {
 public:
-    UsernameInput() = default;
-    UsernameInput(const std::string& str)
-        : data_(str)
-    { }
-    UsernameInput(const char* cstr)
-        : data_(cstr)
-    { }
+    using Input::Input;
 
     virtual std::string data() const override
     {
@@ -25,28 +19,20 @@ public:
     virtual bool isValid() const override
     {
         const std::regex username{R"(^(?=[a-zA-Z0-9._]{6,20}$)(?!.*[_.]{2})[^_.].*[^_.]$)"};
-
-        // std::cout << std::boolalpha << "lower=" << std::regex_search(data_, lowerCase)
-        //           << " upper=" << std::regex_search(data_, upperCase)
-        //           << " number=" << std::regex_search(data_, number)
-        //           << " special=" << std::regex_search(data_, specialChars)
-        //           << " length=" << std::regex_match(data_, lengthCheck) << '\n';
-
         return std::regex_match(data_, username);
     }
 
-    friend std::istream& operator>>(std::istream& stream, UsernameInput& input)
+    virtual bool isValid(std::ostream& out) const override
     {
-        return stream >> input.data_;
-    }
+        if(isValid()) {
+            return true;
+        }
 
-    friend std::ostream& operator<<(std::ostream& stream, const UsernameInput& input)
-    {
-        return stream << input.data_;
+        out << "UsernameInput should contain min 6 max 20 characters from set [a-z], [A-Z], [0-9] "
+               "and [._]. Also, no _ or . at the beginning, no __ or _. or ._ or .. inside and no "
+               "_ or . at the end.\n";
+        return false;
     }
-
-private:
-    std::string data_;
 };
 
 #endif

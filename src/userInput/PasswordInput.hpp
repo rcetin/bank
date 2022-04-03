@@ -9,13 +9,7 @@
 class PasswordInput : public Input<std::string>
 {
 public:
-    PasswordInput() = default;
-    PasswordInput(const std::string& str)
-        : data_(str)
-    { }
-    PasswordInput(const char* cstr)
-        : data_(cstr)
-    { }
+    using Input::Input;
 
     virtual std::string data() const override
     {
@@ -41,18 +35,16 @@ public:
                std::regex_match(data_, lengthCheck);
     }
 
-    friend std::istream& operator>>(std::istream& stream, PasswordInput& input)
+    virtual bool isValid(std::ostream& out) const override
     {
-        return stream >> input.data_;
-    }
+        if(isValid()) {
+            return true;
+        }
 
-    friend std::ostream& operator<<(std::ostream& stream, const PasswordInput& input)
-    {
-        return stream << std::string(input.data_.length(), '*');
+        out << "PasswordInput should contain min 8 and max 32 characters from set [a-z], [A-Z], "
+               "[0-9], [.!@#$%^&*/].\n";
+        return false;
     }
-
-private:
-    std::string data_;
 };
 
 #endif

@@ -9,13 +9,7 @@
 class IntegerInput : public Input<int32_t>
 {
 public:
-    IntegerInput() = default;
-    IntegerInput(const std::string& str)
-        : data_(str)
-    { }
-    IntegerInput(const char* cstr)
-        : data_(cstr)
-    { }
+    using Input::Input;
 
     virtual int32_t data() const override
     {
@@ -32,18 +26,16 @@ public:
                std::regex_match(data_, zero);
     }
 
-    friend std::istream& operator>>(std::istream& stream, IntegerInput& input)
+    virtual bool isValid(std::ostream& out) const override
     {
-        return stream >> input.data_;
-    }
+        if(isValid()) {
+            return true;
+        }
 
-    friend std::ostream& operator<<(std::ostream& stream, const IntegerInput& input)
-    {
-        return stream << input.data_;
+        out << "IntegerInput should contain 1 or more characters from set [1-9] and should not "
+               "start with + sign.\n";
+        return false;
     }
-
-private:
-    std::string data_;
 };
 
 #endif

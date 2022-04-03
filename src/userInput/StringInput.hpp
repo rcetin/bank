@@ -9,13 +9,7 @@
 class StringInput : public Input<std::string>
 {
 public:
-    StringInput() = default;
-    StringInput(const std::string& str)
-        : data_(str)
-    { }
-    StringInput(const char* cstr)
-        : data_(cstr)
-    { }
+    using Input::Input;
 
     virtual std::string data() const override
     {
@@ -28,18 +22,16 @@ public:
         return std::regex_match(data_, stringSchema);
     }
 
-    friend std::istream& operator>>(std::istream& stream, StringInput& input)
+    virtual bool isValid(std::ostream& out) const override
     {
-        return stream >> input.data_;
-    }
+        if(isValid()) {
+            return true;
+        }
 
-    friend std::ostream& operator<<(std::ostream& stream, const StringInput& input)
-    {
-        return stream << input.data_;
+        out << "StringInput should contain 1 or more characters from set [a-z], [A-Z] and white "
+               "space.\n";
+        return false;
     }
-
-private:
-    std::string data_;
 };
 
 #endif

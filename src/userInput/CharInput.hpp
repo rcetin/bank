@@ -9,16 +9,7 @@
 class CharInput : public Input<char>
 {
 public:
-    CharInput() = default;
-    CharInput(const std::string& str)
-        : data_(str)
-    { }
-    CharInput(const char* cstr)
-        : data_(cstr)
-    { }
-    CharInput(char charStr)
-        : data_(std::string(1, charStr))
-    { }
+    using Input::Input;
 
     virtual char data() const override
     {
@@ -31,23 +22,20 @@ public:
         return std::regex_match(data_, optionCharacter);
     }
 
+    virtual bool isValid(std::ostream& out) const override
+    {
+        if(isValid()) {
+            return true;
+        }
+
+        out << "CharInput should contain 1 character from set [a-z] and [A-Z].\n";
+        return false;
+    }
+
     bool operator==(const CharInput& c)
     {
         return data_ == c.data_;
     }
-
-    friend std::istream& operator>>(std::istream& stream, CharInput& input)
-    {
-        return stream >> input.data_;
-    }
-
-    friend std::ostream& operator<<(std::ostream& stream, const CharInput& input)
-    {
-        return stream << input.data_;
-    }
-
-private:
-    std::string data_;
 };
 
 #endif
