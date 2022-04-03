@@ -9,15 +9,25 @@
 class Credentials
 {
 public:
+    Credentials() = default;
+    Credentials(const std::string&, const std::string&);
+    Credentials(const std::string&, const std::string&, std::ostream&);
     bool setUsername(const std::string&);
+    bool setUsername(const std::string&, std::ostream&);
     bool setPassword(const std::string&);
-    std::string username(void);
-    std::string password(void); // hash
+    bool setPassword(const std::string&, std::ostream&);
+    std::string username(void) const;
+    std::string password(void) const; // hash
+    bool isUsernameValid(void) const;
+    bool isUsernameValid(std::ostream&) const;
+    bool isPasswordValid(void) const;
+    bool isPasswordValid(std::ostream&) const;
 
 private:
     bool hash(std::string&);
 
     UsernameInput username_;
+    PasswordInput password_;
     std::string passwordHash_;
 };
 

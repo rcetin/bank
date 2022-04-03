@@ -24,12 +24,6 @@ public:
         const std::regex specialChars{R"([.!@#$%^&*/]+)"};
         const std::regex lengthCheck{".{8,32}"};
 
-        // std::cout << std::boolalpha << "lower=" << std::regex_search(data_, lowerCase)
-        //           << " upper=" << std::regex_search(data_, upperCase)
-        //           << " number=" << std::regex_search(data_, number)
-        //           << " special=" << std::regex_search(data_, specialChars)
-        //           << " length=" << std::regex_match(data_, lengthCheck) << '\n';
-
         return std::regex_search(data_, lowerCase) && std::regex_search(data_, upperCase) &&
                std::regex_search(data_, number) && std::regex_search(data_, specialChars) &&
                std::regex_match(data_, lengthCheck);

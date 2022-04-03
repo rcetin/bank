@@ -3,5 +3,6 @@ target_include_directories(testing PRIVATE
 )
 
 target_sources(testing PRIVATE
-    Credentials.cpp
+    CredentialsTest.cpp
+    ${PROJECT_SOURCE_DIR}/src/userOperations/Credentials/Credentials.cpp
 )

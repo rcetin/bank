@@ -3,6 +3,20 @@
 #include <userInput/UsernameInput.hpp>
 #include <userOperations/Credentials/Credentials.hpp>
 
+Credentials::Credentials(const std::string& username, const std::string& password)
+{
+    setUsername(username);
+    setPassword(password);
+}
+
+Credentials::Credentials(const std::string& username,
+                         const std::string& password,
+                         std::ostream& out)
+{
+    setUsername(username, out);
+    setPassword(password, out);
+}
+
 bool Credentials::setUsername(const std::string& u)
 {
     UsernameInput username{u};
@@ -15,6 +29,15 @@ bool Credentials::setUsername(const std::string& u)
     return true;
 }
 
+bool Credentials::setUsername(const std::string& u, std::ostream& out)
+{
+    if(setUsername(u)) {
+        return true;
+    }
+
+    return UsernameInput{u}.isValid(out);
+}
+
 bool Credentials::setPassword(const std::string& p)
 {
     PasswordInput password{p};
@@ -25,22 +48,52 @@ bool Credentials::setPassword(const std::string& p)
     }
 
     hashedPassword = password.data();
-
     if(!hash(hashedPassword)) {
         return false;
     }
 
+    password_ = password;
+    passwordHash_ = hashedPassword;
     return true;
 }
 
-std::string Credentials::username(void)
+bool Credentials::setPassword(const std::string& p, std::ostream& out)
+{
+    if(setPassword(p)) {
+        return true;
+    }
+
+    return PasswordInput{p}.isValid(out);
+}
+
+std::string Credentials::username(void) const
 {
     return username_.data();
 }
 
-std::string Credentials::password(void)
+std::string Credentials::password(void) const
 {
-    return passwordHash_;
+    return password_.data();
+}
+
+bool Credentials::isUsernameValid(void) const
+{
+    return username_.isValid();
+}
+
+bool Credentials::isUsernameValid(std::ostream& out) const
+{
+    return username_.isValid(out);
+}
+
+bool Credentials::isPasswordValid(void) const
+{
+    return password_.isValid();
+}
+
+bool Credentials::isPasswordValid(std::ostream& out) const
+{
+    return password_.isValid(out);
 }
 
 bool Credentials::hash(std::string& s)
