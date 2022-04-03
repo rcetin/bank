@@ -5,4 +5,5 @@ target_include_directories(testing PRIVATE
 target_sources(testing PRIVATE
     Rand.cpp
     Tree.cpp
+    Datetime.cpp
 )

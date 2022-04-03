@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include <string>
 
-#include <Tree/Tree.hpp>
+#include <Tree.hpp>
 
 TEST(BasicTree, SuccessAddingRoot)
 {

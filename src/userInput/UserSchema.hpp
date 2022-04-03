@@ -7,7 +7,7 @@
 
 #include <userInput/CharInput.hpp>
 #include <userInput/StringInput.hpp>
-#include <utils/Tree/Tree.hpp>
+#include <utils/Tree.hpp>
 
 class UserSchema
 {

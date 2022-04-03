@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include <iostream>
 
-#include <Rand/Rand.hpp>
+#include <Rand.hpp>
 
 TEST(BasicRand, Randomness)
 {
