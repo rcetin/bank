@@ -17,4 +17,7 @@ public:
     }
 };
 
+using uuid = Rand<INT32_MIN, INT32_MAX>;
+using uuidType = int32_t;
+
 #endif

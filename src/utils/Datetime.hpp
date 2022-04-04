@@ -7,6 +7,7 @@
 class Datetime
 {
 public:
+    Datetime() = default;
     Datetime(std::time_t epoch)
         : time_(epoch)
     { }
@@ -14,6 +15,11 @@ public:
     std::string dump(void)
     {
         return std::string{std::asctime(std::localtime(&time_))};
+    }
+
+    void set(std::time_t epoch)
+    {
+        time_ = epoch;
     }
 
     time_t epoch(void)
@@ -52,7 +58,7 @@ public:
     }
 
 private:
-    time_t time_;
+    time_t time_ = 0;
 };
 
 #endif
