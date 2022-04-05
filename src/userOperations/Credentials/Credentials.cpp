@@ -29,6 +29,16 @@ bool Credentials::setUsername(const std::string& u)
     return true;
 }
 
+bool Credentials::setCredentials(const std::string& u, const std::string& p)
+{
+    return setUsername(u) && setPassword(p);
+}
+
+bool Credentials::setCredentials(const std::string& u, const std::string& p, std::ostream& out)
+{
+    return setUsername(u, out) && setPassword(p, out);
+}
+
 bool Credentials::setUsername(const std::string& u, std::ostream& out)
 {
     if(setUsername(u)) {
@@ -94,6 +104,16 @@ bool Credentials::isPasswordValid(void) const
 bool Credentials::isPasswordValid(std::ostream& out) const
 {
     return password_.isValid(out);
+}
+
+bool Credentials::isValid(void) const
+{
+    return username_.isValid() && password_.isValid();
+}
+
+bool Credentials::isValid(std::ostream& out) const
+{
+    return username_.isValid(out) && password_.isValid(out);
 }
 
 bool Credentials::hash(std::string& s)

@@ -126,7 +126,7 @@ public:
         uuidType from, uuidType to, Datetime timeFrom, Datetime timeTo, TransactionList& outTxList);
 
 private:
-    uuidType txId;
+    uuidType id_;
     Datetime date_;
     uuidType from_;
     uuidType to_;
