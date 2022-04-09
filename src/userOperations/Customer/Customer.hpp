@@ -11,34 +11,41 @@
 class Customer
 {
 public:
-    struct CustomerInfo
-    {
-        std::string fullname;
-        std::string email;
-        std::string address;
-        std::string birthday;
-    };
-
     Customer() = default;
-    Customer(const CustomerInfo&);
-    uuidType id(void);
-    std::string fullname(void);
-    std::string email(void);
-    std::string address(void);
-    std::string birthday(void);
-    void setInfo(const CustomerInfo&);
-    bool store(void);
+    Customer(const std::string& fullname,
+             const std::string& email,
+             const std::string& address,
+             const std::string& birthday);
+    // uuidType id(void);
+    std::string fullname(void) const;
+    std::string email(void) const;
+    std::string address(void) const;
+    std::string birthday(void) const;
+    void setInfo(const std::string& fullname,
+                 const std::string& email,
+                 const std::string& address,
+                 const std::string& birthday);
 
     static bool find(uuidType customerId,
                      Customer& outCustomer); // id will be returned from credential verification.
-    static bool edit(uuidType, const CustomerInfo&);
-    static bool create(const CustomerInfo&, Customer&);
+    static bool edit(uuidType customerId,
+                     const std::string& fullname,
+                     const std::string& email,
+                     const std::string& address,
+                     const std::string& birthday);
+    static bool create(const std::string& fullname,
+                       const std::string& email,
+                       const std::string& address,
+                       const std::string& birthday,
+                       Customer&);
 
 private:
-    uuidType id_;
-    CustomerInfo info_;
-    Credentials loginCred_;
-    AccountList accounts_;
+    // uuidType id_;
+    std::string fullname_;
+    std::string address_;
+    std::string email_;
+    std::string birthday_;
+    // Account::AccountList accounts_;
     Datetime registerDate_;
 };
 

@@ -29,10 +29,6 @@ public:
 private:
     bool hash(std::string&);
 
-    bool isUsernameValid(void) const;
-    bool isUsernameValid(std::ostream&) const;
-    bool isPasswordValid(void) const;
-    bool isPasswordValid(std::ostream&) const;
     bool setUsername(const std::string&);
     bool setUsername(const std::string&, std::ostream&);
     bool setPassword(const std::string&);

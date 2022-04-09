@@ -11,12 +11,15 @@ class Account
 {
 public:
     Account() = default;
-    uuidType id();
-    std::string owner();
-    int32_t balance();
-    std::string openDate();
-    std::string dumpDetails();
-    std::string dumpTxHistory();
+    Account(uuidType ownerId);
+
+    void setOwnerId(uuidType);
+    uuidType id() const;
+    std::string owner() const;
+    int32_t balance() const;
+    std::string openDate() const;
+    std::string dumpDetails() const;
+    std::string dumpTxHistory() const;
     bool deposit(int32_t);
     bool withdraw(int32_t);
 
@@ -24,11 +27,12 @@ public:
 
     static bool find(uuidType customerId, AccountList& outAccounts);
     static bool create(uuidType customerId, Account& outAccount);
+    static bool del(uuidType accountId);
 
 private:
     uuidType id_;
-    int32_t balance_;
-    Customer owner_;
+    int32_t balance_ = 0;
+    // Customer owner_;
     uuidType ownerId_;
     Datetime openDate_;
     bool isBlocked_;

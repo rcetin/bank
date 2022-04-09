@@ -2,6 +2,7 @@
 #include <userInput/PasswordInput.hpp>
 #include <userInput/UsernameInput.hpp>
 #include <userOperations/Credentials/Credentials.hpp>
+#include <userOperations/Storage/Storage.hpp>
 
 Credentials::Credentials(const std::string& username, const std::string& password)
 {
@@ -83,27 +84,7 @@ std::string Credentials::username(void) const
 
 std::string Credentials::password(void) const
 {
-    return password_.data();
-}
-
-bool Credentials::isUsernameValid(void) const
-{
-    return username_.isValid();
-}
-
-bool Credentials::isUsernameValid(std::ostream& out) const
-{
-    return username_.isValid(out);
-}
-
-bool Credentials::isPasswordValid(void) const
-{
-    return password_.isValid();
-}
-
-bool Credentials::isPasswordValid(std::ostream& out) const
-{
-    return password_.isValid(out);
+    return passwordHash_;
 }
 
 bool Credentials::isValid(void) const

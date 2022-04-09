@@ -1,7 +1,7 @@
 target_sources(bank PRIVATE 
-    Credentials.cpp
+    Account.cpp
 )
 
 target_sources(testing PRIVATE 
-    Credentials.cpp
+    Account.cpp
 )

@@ -12,7 +12,7 @@ public:
         : time_(epoch)
     { }
 
-    std::string dump(void)
+    std::string dump(void) const
     {
         return std::string{std::asctime(std::localtime(&time_))};
     }
@@ -22,7 +22,7 @@ public:
         time_ = epoch;
     }
 
-    time_t epoch(void)
+    time_t epoch(void) const
     {
         return time_;
     }

@@ -33,6 +33,6 @@ TEST(BasicCredentials, SuccessUsernamePasswordOnCorrectFormat)
         Credentials cred;
         EXPECT_TRUE(cred.setCredentials(credPair.first, credPair.second));
         EXPECT_EQ(credPair.first, cred.username());
-        EXPECT_EQ(credPair.second, cred.password());
+        EXPECT_NE("", cred.password());
     }
 }

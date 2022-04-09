@@ -21,7 +21,6 @@ CREATE TABLE [Accounts]
     [AccountId] INTEGER PRIMARY KEY NOT NULL,
     [CustomerId] INTEGER NOT NULL,
     [Balance] INTEGER NOT NULL,
-    [AccountType] TEXT NOT NULL,
     [OpenDate] TEXT NOT NULL,
     FOREIGN KEY ([CustomerId]) REFERENCES [Customers] ([CustomerId]) 
 		ON DELETE NO ACTION ON UPDATE NO ACTION
