@@ -26,19 +26,6 @@ public:
                  const std::string& address,
                  const std::string& birthday);
 
-    static bool find(uuidType customerId,
-                     Customer& outCustomer); // id will be returned from credential verification.
-    static bool edit(uuidType customerId,
-                     const std::string& fullname,
-                     const std::string& email,
-                     const std::string& address,
-                     const std::string& birthday);
-    static bool create(const std::string& fullname,
-                       const std::string& email,
-                       const std::string& address,
-                       const std::string& birthday,
-                       Customer&);
-
 private:
     // uuidType id_;
     std::string fullname_;

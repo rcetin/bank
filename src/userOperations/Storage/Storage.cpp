@@ -39,13 +39,6 @@ static const char* createAccountTableCmd =
     "ON DELETE NO ACTION ON UPDATE NO ACTION"
     ")";
 
-// static const char* dropTableCmd = "DROP TABLE [Customer]";
-
-// bool Storage::removeDb(void)
-// {
-//     return std::remove(dbFile);
-// }
-
 namespace Storage::CustomerMngr
 {
 
@@ -55,7 +48,6 @@ bool insert(const Customer& customer, uuidType& outid)
     int32_t ret;
 
     SQLite::Database db(dbFile, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
-    std::cout << "SQLite database file '" << db.getFilename().c_str() << "' opened successfully\n";
     db.exec(createCustomerTableCmd);
 
     ret = std::snprintf(commandArray.data(),
@@ -77,7 +69,7 @@ bool insert(const Customer& customer, uuidType& outid)
         return false;
     }
 
-    std::cout << "Insert command executed: " << commandArray.data() << "\n";
+    std::cout << "Executed command: " << commandArray.data() << "\n";
     db.exec(commandArray.data());
 
     return getByEmail(customer.email(), outid);
@@ -89,7 +81,6 @@ bool getByEmail(const std::string& email, uuidType& outid)
     int32_t ret;
 
     SQLite::Database db(dbFile, SQLite::OPEN_READWRITE);
-    std::cout << "SQLite database file '" << db.getFilename().c_str() << "' opened successfully\n";
 
     ret = std::snprintf(commandArray.data(),
                         maxSqlCommandLen,
@@ -101,8 +92,8 @@ bool getByEmail(const std::string& email, uuidType& outid)
         return false;
     }
 
-    SQLite::Statement query(db, commandArray.data());
     std::cout << "Executed command: " << commandArray.data() << "\n";
+    SQLite::Statement query(db, commandArray.data());
 
     if(query.executeStep()) {
         std::cout << "row =" << query.getColumn(0).getName()
@@ -120,7 +111,6 @@ bool getByUsername(const std::string& username, uuidType& outid)
     int32_t ret;
 
     SQLite::Database db(dbFile, SQLite::OPEN_READWRITE);
-    std::cout << "SQLite database file '" << db.getFilename().c_str() << "' opened successfully\n";
 
     ret = std::snprintf(commandArray.data(),
                         maxSqlCommandLen,
@@ -132,8 +122,8 @@ bool getByUsername(const std::string& username, uuidType& outid)
         return false;
     }
 
-    SQLite::Statement query(db, commandArray.data());
     std::cout << "Executed command: " << commandArray.data() << "\n";
+    SQLite::Statement query(db, commandArray.data());
 
     if(query.executeStep()) {
         std::cout << "row =" << query.getColumn(0).getName()
@@ -151,7 +141,6 @@ bool update(uuidType customerId, const Customer& customer)
     int32_t ret;
 
     SQLite::Database db(dbFile, SQLite::OPEN_READWRITE);
-    std::cout << "SQLite database file '" << db.getFilename().c_str() << "' opened successfully\n";
 
     ret = std::snprintf(commandArray.data(),
                         maxSqlCommandLen,
@@ -171,8 +160,8 @@ bool update(uuidType customerId, const Customer& customer)
         return false;
     }
 
-    db.exec(commandArray.data());
     std::cout << "Executed command: " << commandArray.data() << "\n";
+    db.exec(commandArray.data());
 
     return true;
 }
@@ -182,13 +171,12 @@ bool update(uuidType customerId, const Customer& customer)
 namespace Storage::CredentialsMngr
 {
 
-bool insert(const Credentials& credentials, int32_t customerId)
+bool insert(const Credentials& credentials, int32_t customerId, uuidType& outid)
 {
     std::array<char, maxSqlCommandLen> commandArray{};
     int32_t ret;
 
     SQLite::Database db(dbFile, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
-    std::cout << "SQLite database file '" << db.getFilename().c_str() << "' opened successfully\n";
     db.exec(createCredentialsTableCmd);
 
     ret = std::snprintf(commandArray.data(),
@@ -209,11 +197,99 @@ bool insert(const Credentials& credentials, int32_t customerId)
         return false;
     }
 
-    std::cout << "Insert command executed: " << commandArray.data() << "\n";
+    std::cout << "Executed command: " << commandArray.data() << "\n";
+    db.exec(commandArray.data());
+
+    return getByCustomerId(customerId, outid);
+}
+
+bool getByCustomerId(int32_t customerId, uuidType& outid)
+{
+    std::array<char, maxSqlCommandLen> commandArray{};
+    int32_t ret;
+
+    SQLite::Database db(dbFile, SQLite::OPEN_READWRITE);
+
+    ret = std::snprintf(commandArray.data(),
+                        maxSqlCommandLen,
+                        "SELECT id FROM [Credentials]"
+                        "WHERE customerId = %d",
+                        customerId);
+
+    if(ret <= 0) {
+        return false;
+    }
+
+    std::cout << "Executed command: " << commandArray.data() << "\n";
+    SQLite::Statement query(db, commandArray.data());
+
+    if(query.executeStep()) {
+        std::cout << "row =" << query.getColumn(0).getName()
+                  << " val=" << query.getColumn(0).getInt() << "\n";
+        outid = query.getColumn(0).getInt();
+        return true;
+    }
+
+    return false;
+}
+
+bool getByUsername(const std::string& username, uuidType& outid)
+{
+    std::array<char, maxSqlCommandLen> commandArray{};
+    int32_t ret;
+
+    SQLite::Database db(dbFile, SQLite::OPEN_READWRITE);
+
+    ret = std::snprintf(commandArray.data(),
+                        maxSqlCommandLen,
+                        "SELECT id FROM [Credentials]"
+                        "WHERE username = \"%s\"",
+                        username.c_str());
+
+    if(ret <= 0) {
+        return false;
+    }
+
+    std::cout << "Executed command: " << commandArray.data() << "\n";
+    SQLite::Statement query(db, commandArray.data());
+
+    if(query.executeStep()) {
+        std::cout << "row =" << query.getColumn(0).getName()
+                  << " val=" << query.getColumn(0).getInt() << "\n";
+        outid = query.getColumn(0).getInt();
+        return true;
+    }
+
+    return false;
+}
+
+bool update(uuidType id, const Credentials& credentials)
+{
+    std::array<char, maxSqlCommandLen> commandArray{};
+    int32_t ret;
+
+    SQLite::Database db(dbFile, SQLite::OPEN_READWRITE);
+
+    ret = std::snprintf(commandArray.data(),
+                        maxSqlCommandLen,
+                        "UPDATE [Credentials]"
+                        "SET [username] = \"%s\","
+                        "[password] = \"%s\""
+                        "WHERE id = %d",
+                        credentials.username().c_str(),
+                        credentials.password().c_str(),
+                        id);
+
+    if(ret <= 0) {
+        return false;
+    }
+
+    std::cout << "Executed update command: " << commandArray.data() << "\n";
     db.exec(commandArray.data());
 
     return true;
 }
+
 } // namespace Storage::CredentialsMngr
 
 namespace Storage::AccountMngr

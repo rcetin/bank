@@ -20,12 +20,6 @@ public:
     bool isValid(void) const;
     bool isValid(std::ostream&) const;
 
-    static bool create(const std::string& username, const std::string& password, uuidType ownerId);
-    static bool verifyCredentials(const std::string& username,
-                                  const std::string& password,
-                                  uuidType& outCustomerId);
-    static bool changePassword(uuidType customerId, const std::string newPassword);
-
 private:
     bool hash(std::string&);
 

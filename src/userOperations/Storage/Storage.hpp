@@ -40,7 +40,11 @@ namespace TransactionMngr
 
 namespace CredentialsMngr
 {
-bool insert(const Credentials& credentials, int32_t customerId);
+bool insert(const Credentials& credentials, int32_t customerId, uuidType&);
+bool getByCustomerId(int32_t customerId, uuidType&);
+bool getByUsername(const std::string& username, uuidType&);
+bool update(uuidType, const Credentials&);
+
 } // namespace CredentialsMngr
 
 } // namespace Storage

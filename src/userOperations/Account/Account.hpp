@@ -25,10 +25,6 @@ public:
 
     using AccountList = std::vector<Account>;
 
-    static bool find(uuidType customerId, AccountList& outAccounts);
-    static bool create(uuidType customerId, Account& outAccount);
-    static bool del(uuidType accountId);
-
 private:
     uuidType id_;
     int32_t balance_ = 0;
