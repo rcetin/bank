@@ -13,8 +13,11 @@ public:
     Credentials() = default;
     Credentials(const std::string&, const std::string&);
     Credentials(const std::string&, const std::string&, std::ostream&);
-    bool setCredentials(const std::string&, const std::string&);
-    bool setCredentials(const std::string&, const std::string&, std::ostream&);
+    bool setCredentials(const std::string& username, const std::string& password);
+    bool
+    setCredentials(const std::string& username, const std::string& password, std::ostream& out);
+    bool setCredentialsWithHashedPassword(const std::string& username,
+                                          const std::string& hashedPassword);
     std::string username(void) const;
     std::string password(void) const; // hash
     bool isValid(void) const;

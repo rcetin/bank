@@ -24,15 +24,17 @@ constexpr int32_t STORAGE_ERROR = -1;
 namespace CustomerMngr
 {
 bool insert(const Customer&, uuidType&);
-bool getByEmail(const std::string&, uuidType&);
-bool getByUsername(const std::string&, uuidType&);
+bool getByEmail(const std::string&, uuidType&, Customer&);
+bool getByUsername(const std::string&, uuidType&, Customer&);
 bool update(uuidType, const Customer&);
 } // namespace CustomerMngr
 
 namespace AccountMngr
 {
 bool insert(const Account& account, int32_t customerId);
-}
+bool getByCustomerId(int32_t customerId, uuidType&);
+
+} // namespace AccountMngr
 
 namespace TransactionMngr
 {
@@ -41,8 +43,8 @@ namespace TransactionMngr
 namespace CredentialsMngr
 {
 bool insert(const Credentials& credentials, int32_t customerId, uuidType&);
-bool getByCustomerId(int32_t customerId, uuidType&);
-bool getByUsername(const std::string& username, uuidType&);
+bool getByCustomerId(int32_t customerId, uuidType&, Credentials&);
+bool getByUsername(const std::string& username, uuidType&, Credentials&);
 bool update(uuidType, const Credentials&);
 
 } // namespace CredentialsMngr

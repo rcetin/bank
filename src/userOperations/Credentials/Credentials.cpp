@@ -40,6 +40,13 @@ bool Credentials::setCredentials(const std::string& u, const std::string& p, std
     return setUsername(u, out) && setPassword(p, out);
 }
 
+bool Credentials::setCredentialsWithHashedPassword(const std::string& username,
+                                                   const std::string& hashedPassword)
+{
+    passwordHash_ = hashedPassword;
+    return setUsername(username);
+}
+
 bool Credentials::setUsername(const std::string& u, std::ostream& out)
 {
     if(setUsername(u)) {
