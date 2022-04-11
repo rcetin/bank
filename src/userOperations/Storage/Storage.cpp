@@ -6,7 +6,7 @@
 #include <SQLiteCpp/SQLiteCpp.h>
 #include <userOperations/Storage/Storage.hpp>
 
-static constexpr size_t maxSqlCommandLen = 256;
+static constexpr size_t maxSqlCommandLen = 512;
 
 static const char* createCustomerTableCmd = "CREATE TABLE IF NOT EXISTS [Customers]"
                                             "("
@@ -33,8 +33,8 @@ static const char* createAccountTableCmd =
     "("
     "[accountId] INTEGER PRIMARY KEY NOT NULL,"
     "[customerId] INTEGER NOT NULL,"
-    "[balance] INTEGER NOT NULL,"
-    "[openDate] TEXT NOT NULL,"
+    "[balance] REAL NOT NULL,"
+    "[openDate] INTEGER NOT NULL,"
     "FOREIGN KEY ([customerId]) REFERENCES [Customers] ([customerId])"
     "ON DELETE NO ACTION ON UPDATE NO ACTION"
     ")";
@@ -42,7 +42,7 @@ static const char* createAccountTableCmd =
 namespace Storage::CustomerMngr
 {
 
-bool insert(const Customer& customer, uuidType& outid)
+bool insert(const Customer& customer, std::pair<uuidType, Customer>& outCustomerPair)
 {
     std::array<char, maxSqlCommandLen> commandArray{};
     int32_t ret;
@@ -73,10 +73,10 @@ bool insert(const Customer& customer, uuidType& outid)
     std::cout << "Executed command: " << commandArray.data() << "\n";
     db.exec(commandArray.data());
 
-    return getByEmail(customer.email(), outid, dummyCustomer);
+    return getByEmail(customer.email(), outCustomerPair);
 }
 
-bool getByEmail(const std::string& email, uuidType& outid, Customer& outCustomer)
+bool getByEmail(const std::string& email, std::pair<uuidType, Customer>& outCustomerPair)
 {
     std::array<char, maxSqlCommandLen> commandArray{};
     int32_t ret;
@@ -99,21 +99,21 @@ bool getByEmail(const std::string& email, uuidType& outid, Customer& outCustomer
     if(query.executeStep()) {
         // std::cout << "row =" << query.getColumn(0).getName()
         //           << " val=" << query.getColumn(0).getInt() << "\n";
-        outid = query.getColumn(0).getInt();
+        outCustomerPair.first = query.getColumn(0).getInt();
         std::string fullname, email, address, birthday;
         fullname = query.getColumn(1).getString();
         email = query.getColumn(2).getString();
         address = query.getColumn(3).getString();
         birthday = query.getColumn(4).getString();
 
-        outCustomer.setInfo(fullname, email, address, birthday);
+        outCustomerPair.second.setInfo(fullname, email, address, birthday);
         return true;
     }
 
     return false;
 }
 
-bool getByUsername(const std::string& username, uuidType& outid, Customer& outCustomer)
+bool getByUsername(const std::string& username, std::pair<uuidType, Customer>& outCustomerPair)
 {
     std::array<char, maxSqlCommandLen> commandArray{};
     int32_t ret;
@@ -137,21 +137,23 @@ bool getByUsername(const std::string& username, uuidType& outid, Customer& outCu
     SQLite::Statement query(db, commandArray.data());
 
     if(query.executeStep()) {
-        outid = query.getColumn(0).getInt();
+        outCustomerPair.first = query.getColumn(0).getInt();
         std::string fullname, email, address, birthday;
         fullname = query.getColumn(1).getString();
         email = query.getColumn(2).getString();
         address = query.getColumn(3).getString();
         birthday = query.getColumn(4).getString();
 
-        outCustomer.setInfo(fullname, email, address, birthday);
+        outCustomerPair.second.setInfo(fullname, email, address, birthday);
         return true;
     }
 
     return false;
 }
 
-bool update(uuidType customerId, const Customer& customer)
+bool update(uuidType customerId,
+            const Customer& customer,
+            std::pair<uuidType, Customer>& outCustomerPair)
 {
     std::array<char, maxSqlCommandLen> commandArray{};
     int32_t ret;
@@ -179,7 +181,7 @@ bool update(uuidType customerId, const Customer& customer)
     std::cout << "Executed command: " << commandArray.data() << "\n";
     db.exec(commandArray.data());
 
-    return true;
+    return getByEmail(customer.email(), outCustomerPair);
 }
 
 } // namespace Storage::CustomerMngr
@@ -187,11 +189,12 @@ bool update(uuidType customerId, const Customer& customer)
 namespace Storage::CredentialsMngr
 {
 
-bool insert(const Credentials& credentials, int32_t customerId, uuidType& outid)
+bool insert(const Credentials& credentials,
+            int32_t customerId,
+            std::pair<uuidType, Credentials>& outCredentialPair)
 {
     std::array<char, maxSqlCommandLen> commandArray{};
     int32_t ret;
-    Credentials dummyCred;
 
     SQLite::Database db(dbFile, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
     db.exec(createCredentialsTableCmd);
@@ -217,10 +220,10 @@ bool insert(const Credentials& credentials, int32_t customerId, uuidType& outid)
     std::cout << "Executed command: " << commandArray.data() << "\n";
     db.exec(commandArray.data());
 
-    return getByCustomerId(customerId, outid, dummyCred);
+    return getByCustomerId(customerId, outCredentialPair);
 }
 
-bool getByCustomerId(int32_t customerId, uuidType& outid, Credentials& outCredentials)
+bool getByCustomerId(int32_t customerId, std::pair<uuidType, Credentials>& outCredentialPair)
 {
     std::array<char, maxSqlCommandLen> commandArray{};
     int32_t ret;
@@ -241,19 +244,19 @@ bool getByCustomerId(int32_t customerId, uuidType& outid, Credentials& outCreden
     SQLite::Statement query(db, commandArray.data());
 
     if(query.executeStep()) {
-        outid = query.getColumn(0).getInt();
+        outCredentialPair.first = query.getColumn(0).getInt();
         std::string username, password;
         username = query.getColumn(1).getString();
         password = query.getColumn(2).getString();
 
-        outCredentials.setCredentialsWithHashedPassword(username, password);
+        outCredentialPair.second.setCredentialsWithHashedPassword(username, password);
         return true;
     }
 
     return false;
 }
 
-bool getByUsername(const std::string& username, uuidType& outid, Credentials& outCredentials)
+bool getByUsername(const std::string& username, std::pair<uuidType, Credentials>& outCredentialPair)
 {
     std::array<char, maxSqlCommandLen> commandArray{};
     int32_t ret;
@@ -276,18 +279,20 @@ bool getByUsername(const std::string& username, uuidType& outid, Credentials& ou
     if(query.executeStep()) {
         std::string username, password;
 
-        outid = query.getColumn(0).getInt();
+        outCredentialPair.first = query.getColumn(0).getInt();
         username = query.getColumn(1).getString();
         password = query.getColumn(2).getString();
 
-        outCredentials.setCredentialsWithHashedPassword(username, password);
+        outCredentialPair.second.setCredentialsWithHashedPassword(username, password);
         return true;
     }
 
     return false;
 }
 
-bool update(uuidType id, const Credentials& credentials)
+bool update(uuidType id,
+            const Credentials& credentials,
+            std::pair<uuidType, Credentials>& outCredentialPair)
 {
     std::array<char, maxSqlCommandLen> commandArray{};
     int32_t ret;
@@ -311,17 +316,18 @@ bool update(uuidType id, const Credentials& credentials)
     std::cout << "Executed update command: " << commandArray.data() << "\n";
     db.exec(commandArray.data());
 
-    return true;
+    return getByUsername(credentials.username(), outCredentialPair);
 }
 
 } // namespace Storage::CredentialsMngr
 
 namespace Storage::AccountMngr
 {
-bool insert(const Account& account, int32_t customerId)
+bool insert(const Account& account, int32_t customerId, std::pair<uuidType, Account>& outAccount)
 {
     std::array<char, maxSqlCommandLen> commandArray{};
     int32_t ret;
+    std::vector<std::pair<uuidType, Account>> accountVector;
 
     SQLite::Database db(dbFile, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
     std::cout << "SQLite database file '" << db.getFilename().c_str() << "' opened successfully\n";
@@ -335,11 +341,11 @@ bool insert(const Account& account, int32_t customerId)
                         ")"
                         "VALUES"
                         "("
-                        "\"%d\", \"%d\", \"%s\""
+                        "\"%d\", \"%lf\", \"%ld\""
                         ")",
                         customerId,
                         account.balance(),
-                        account.openDate().c_str());
+                        account.openDate().epoch());
 
     if(ret <= 0) {
         return false;
@@ -348,6 +354,49 @@ bool insert(const Account& account, int32_t customerId)
     std::cout << "Insert command executed: " << commandArray.data() << "\n";
     db.exec(commandArray.data());
 
+    if(!getByCustomerId(customerId, accountVector)) {
+        return false;
+    }
+
+    outAccount = accountVector.back();
+
     return true;
 }
+
+bool getByCustomerId(int32_t customerId,
+                     std::vector<std::pair<uuidType, Account>>& outAccountVector)
+{
+    std::array<char, maxSqlCommandLen> commandArray{};
+    int32_t ret;
+
+    SQLite::Database db(dbFile, SQLite::OPEN_READWRITE);
+
+    ret = std::snprintf(commandArray.data(),
+                        maxSqlCommandLen,
+                        "SELECT accountId, customerId, balance, openDate FROM Accounts"
+                        " WHERE customerId = %d",
+                        customerId);
+
+    if(ret <= 0) {
+        return false;
+    }
+
+    std::cout << "Executed command: " << commandArray.data() << "\n";
+    SQLite::Statement query(db, commandArray.data());
+
+    while(query.executeStep()) {
+        std::pair<uuidType, Account> p;
+        uuidType ownerId = query.getColumn(1).getInt();
+        double balance = query.getColumn(2).getDouble();
+        time_t openDate = query.getColumn(3).getInt();
+
+        p.first = query.getColumn(0).getInt();
+        p.second = Account(ownerId, balance, Datetime(openDate));
+
+        outAccountVector.push_back(p);
+    }
+
+    return (!outAccountVector.size()) ? false : true;
+}
+
 } // namespace Storage::AccountMngr

@@ -57,6 +57,11 @@ public:
         return time_ > d.time_;
     }
 
+    static time_t now(void)
+    {
+        return std::time(NULL);
+    }
+
 private:
     time_t time_ = 0;
 };

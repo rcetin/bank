@@ -12,22 +12,27 @@ class Account
 public:
     Account() = default;
     Account(uuidType ownerId);
+    Account(uuidType ownerId, double balance, const Datetime& openDate);
 
+    void setAttributes(uuidType ownerId, double balance, const Datetime& openDate);
     void setOwnerId(uuidType);
-    uuidType id() const;
-    std::string owner() const;
-    int32_t balance() const;
-    std::string openDate() const;
+    uuidType ownerId() const;
+    double balance() const;
+    Datetime openDate() const;
     std::string dumpDetails() const;
     std::string dumpTxHistory() const;
-    bool deposit(int32_t);
-    bool withdraw(int32_t);
+    bool deposit(double);
+    bool withdraw(double);
+
+    friend bool operator==(const Account&, const Account&);
+    friend bool operator!=(const Account&, const Account&);
+    friend std::ostream& operator<<(std::ostream&, const Account&);
 
     using AccountList = std::vector<Account>;
 
 private:
     uuidType id_;
-    int32_t balance_ = 0;
+    double balance_ = 0;
     // Customer owner_;
     uuidType ownerId_;
     Datetime openDate_;

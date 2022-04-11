@@ -23,16 +23,16 @@ constexpr int32_t STORAGE_ERROR = -1;
 
 namespace CustomerMngr
 {
-bool insert(const Customer&, uuidType&);
-bool getByEmail(const std::string&, uuidType&, Customer&);
-bool getByUsername(const std::string&, uuidType&, Customer&);
-bool update(uuidType, const Customer&);
+bool insert(const Customer&, std::pair<uuidType, Customer>&);
+bool getByEmail(const std::string&, std::pair<uuidType, Customer>&);
+bool getByUsername(const std::string&, std::pair<uuidType, Customer>&);
+bool update(uuidType, const Customer&, std::pair<uuidType, Customer>&);
 } // namespace CustomerMngr
 
 namespace AccountMngr
 {
-bool insert(const Account& account, int32_t customerId);
-bool getByCustomerId(int32_t customerId, uuidType&);
+bool insert(const Account& account, int32_t customerId, std::pair<uuidType, Account>&);
+bool getByCustomerId(int32_t customerId, std::vector<std::pair<uuidType, Account>>&);
 
 } // namespace AccountMngr
 
@@ -42,10 +42,10 @@ namespace TransactionMngr
 
 namespace CredentialsMngr
 {
-bool insert(const Credentials& credentials, int32_t customerId, uuidType&);
-bool getByCustomerId(int32_t customerId, uuidType&, Credentials&);
-bool getByUsername(const std::string& username, uuidType&, Credentials&);
-bool update(uuidType, const Credentials&);
+bool insert(const Credentials& credentials, int32_t customerId, std::pair<uuidType, Credentials>&);
+bool getByCustomerId(int32_t customerId, std::pair<uuidType, Credentials>&);
+bool getByUsername(const std::string& username, std::pair<uuidType, Credentials>&);
+bool update(uuidType, const Credentials&, std::pair<uuidType, Credentials>&);
 
 } // namespace CredentialsMngr
 
