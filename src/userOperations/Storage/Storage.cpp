@@ -39,10 +39,26 @@ static const char* createAccountTableCmd =
     "ON DELETE NO ACTION ON UPDATE NO ACTION"
     ")";
 
+static const char* createTransactionTableCmd =
+    "CREATE TABLE IF NOT EXISTS [Transactions]"
+    "("
+    "[transactionId] INTEGER PRIMARY KEY NOT NULL,"
+    "[type] TEXT NOT NULL,"
+    "[fromAcc] INTEGER,"
+    "[toAcc] INTEGER,"
+    "[description] TEXT,"
+    "[amount] REAL NOT NULL,"
+    "[date] INTEGER NOT NULL,"
+    "FOREIGN KEY([fromAcc])"
+    "REFERENCES[Accounts]([accountId]) ON DELETE NO ACTION ON UPDATE NO ACTION,"
+    "FOREIGN KEY([toAcc])"
+    "REFERENCES[Accounts]([accountId]) ON DELETE NO ACTION ON UPDATE NO ACTION"
+    ")";
+
 namespace Storage::CustomerMngr
 {
 
-bool insert(const Customer& customer, std::pair<uuidType, Customer>& outCustomerPair)
+bool insert(const Customer& customer)
 {
     std::array<char, maxSqlCommandLen> commandArray{};
     int32_t ret;
@@ -72,6 +88,15 @@ bool insert(const Customer& customer, std::pair<uuidType, Customer>& outCustomer
 
     std::cout << "Executed command: " << commandArray.data() << "\n";
     db.exec(commandArray.data());
+
+    return true;
+}
+
+bool insert(const Customer& customer, std::pair<uuidType, Customer>& outCustomerPair)
+{
+    if(!insert(customer)) {
+        return false;
+    }
 
     return getByEmail(customer.email(), outCustomerPair);
 }
@@ -151,9 +176,7 @@ bool getByUsername(const std::string& username, std::pair<uuidType, Customer>& o
     return false;
 }
 
-bool update(uuidType customerId,
-            const Customer& customer,
-            std::pair<uuidType, Customer>& outCustomerPair)
+bool update(uuidType customerId, const Customer& customer)
 {
     std::array<char, maxSqlCommandLen> commandArray{};
     int32_t ret;
@@ -180,6 +203,16 @@ bool update(uuidType customerId,
 
     std::cout << "Executed command: " << commandArray.data() << "\n";
     db.exec(commandArray.data());
+    return true;
+}
+
+bool update(uuidType customerId,
+            const Customer& customer,
+            std::pair<uuidType, Customer>& outCustomerPair)
+{
+    if(!update(customerId, customer)) {
+        return false;
+    }
 
     return getByEmail(customer.email(), outCustomerPair);
 }
@@ -189,9 +222,7 @@ bool update(uuidType customerId,
 namespace Storage::CredentialsMngr
 {
 
-bool insert(const Credentials& credentials,
-            int32_t customerId,
-            std::pair<uuidType, Credentials>& outCredentialPair)
+bool insert(const Credentials& credentials, int32_t customerId)
 {
     std::array<char, maxSqlCommandLen> commandArray{};
     int32_t ret;
@@ -219,6 +250,17 @@ bool insert(const Credentials& credentials,
 
     std::cout << "Executed command: " << commandArray.data() << "\n";
     db.exec(commandArray.data());
+
+    return true;
+}
+
+bool insert(const Credentials& credentials,
+            int32_t customerId,
+            std::pair<uuidType, Credentials>& outCredentialPair)
+{
+    if(!insert(credentials, customerId)) {
+        return false;
+    }
 
     return getByCustomerId(customerId, outCredentialPair);
 }
@@ -290,9 +332,7 @@ bool getByUsername(const std::string& username, std::pair<uuidType, Credentials>
     return false;
 }
 
-bool update(uuidType id,
-            const Credentials& credentials,
-            std::pair<uuidType, Credentials>& outCredentialPair)
+bool update(uuidType id, const Credentials& credentials)
 {
     std::array<char, maxSqlCommandLen> commandArray{};
     int32_t ret;
@@ -316,6 +356,17 @@ bool update(uuidType id,
     std::cout << "Executed update command: " << commandArray.data() << "\n";
     db.exec(commandArray.data());
 
+    return true;
+}
+
+bool update(uuidType id,
+            const Credentials& credentials,
+            std::pair<uuidType, Credentials>& outCredentialPair)
+{
+    if(!update(id, credentials)) {
+        return false;
+    }
+
     return getByUsername(credentials.username(), outCredentialPair);
 }
 
@@ -323,11 +374,10 @@ bool update(uuidType id,
 
 namespace Storage::AccountMngr
 {
-bool insert(const Account& account, int32_t customerId, std::pair<uuidType, Account>& outAccount)
+bool insert(const Account& account, int32_t customerId)
 {
     std::array<char, maxSqlCommandLen> commandArray{};
     int32_t ret;
-    std::vector<std::pair<uuidType, Account>> accountVector;
 
     SQLite::Database db(dbFile, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
     std::cout << "SQLite database file '" << db.getFilename().c_str() << "' opened successfully\n";
@@ -353,6 +403,17 @@ bool insert(const Account& account, int32_t customerId, std::pair<uuidType, Acco
 
     std::cout << "Insert command executed: " << commandArray.data() << "\n";
     db.exec(commandArray.data());
+
+    return true;
+}
+
+bool insert(const Account& account, int32_t customerId, std::pair<uuidType, Account>& outAccount)
+{
+    std::vector<std::pair<uuidType, Account>> accountVector;
+
+    if(!insert(account, customerId)) {
+        return false;
+    }
 
     if(!getByCustomerId(customerId, accountVector)) {
         return false;
@@ -399,4 +460,236 @@ bool getByCustomerId(int32_t customerId,
     return (!outAccountVector.size()) ? false : true;
 }
 
+bool update(uuidType id, const Account& account)
+{
+    std::array<char, maxSqlCommandLen> commandArray{};
+    int32_t ret;
+
+    SQLite::Database db(dbFile, SQLite::OPEN_READWRITE);
+
+    ret = std::snprintf(commandArray.data(),
+                        maxSqlCommandLen,
+                        "UPDATE [Accounts]"
+                        "SET customerId = \"%d\","
+                        "balance = \"%lf\","
+                        "openDate = \"%ld\""
+                        "WHERE accountId = %d",
+                        account.ownerId(),
+                        account.balance(),
+                        account.openDate().epoch(),
+                        id);
+
+    if(ret <= 0) {
+        return false;
+    }
+
+    std::cout << "Executed update command: " << commandArray.data() << "\n";
+    db.exec(commandArray.data());
+
+    return true;
+}
+
+bool update(uuidType id, const Account& account, std::pair<uuidType, Account>& outAccountPair)
+{
+    std::vector<std::pair<uuidType, Account>> accountVector;
+
+    if(!update(id, account)) {
+        return false;
+    }
+
+    if(!getByCustomerId(account.ownerId(), accountVector)) {
+        return false;
+    }
+
+    outAccountPair = accountVector.back();
+
+    return true;
+}
+
 } // namespace Storage::AccountMngr
+
+namespace Storage::TransactionMngr
+{
+bool insert(const Transaction& transaction)
+{
+    std::array<char, maxSqlCommandLen> commandArray{};
+    int32_t ret;
+    uuidType relatedAccount = transaction.from() ? transaction.from() : transaction.to();
+
+    if(!relatedAccount) {
+        return false;
+    }
+
+    SQLite::Database db(dbFile, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
+    std::cout << "SQLite database file '" << db.getFilename().c_str() << "' opened successfully\n";
+    db.exec(createTransactionTableCmd);
+
+    ret = std::snprintf(commandArray.data(),
+                        maxSqlCommandLen,
+                        "INSERT INTO [Transactions]"
+                        "("
+                        "[type], [fromAcc], [toAcc], [description], [amount], [date]"
+                        ")"
+                        "VALUES"
+                        "("
+                        "\"%s\", %d, %d, \"%s\", %lf, %ld"
+                        ")",
+                        transaction.type().c_str(),
+                        transaction.from(),
+                        transaction.to(),
+                        transaction.description().c_str(),
+                        transaction.amount(),
+                        transaction.date().epoch());
+
+    if(ret <= 0) {
+        return false;
+    }
+
+    std::cout << "Insert command executed: " << commandArray.data() << "\n";
+    db.exec(commandArray.data());
+
+    return true;
+}
+
+bool insert(const Transaction& transaction, std::pair<uuidType, Transaction>& outTransaction)
+{
+    std::vector<std::pair<uuidType, Transaction>> transactionVector;
+    uuidType relatedAccount = transaction.from() ? transaction.from() : transaction.to();
+
+    if(!relatedAccount) {
+        return false;
+    }
+
+    if(!insert(transaction)) {
+        return false;
+    }
+
+    if(!getByAccountId(relatedAccount, transactionVector)) {
+        return false;
+    }
+
+    outTransaction = transactionVector.back();
+
+    return true;
+}
+
+bool getByAccountId(int32_t accountId,
+                    std::vector<std::pair<uuidType, Transaction>>& outTransactionVector)
+{
+    std::array<char, maxSqlCommandLen> commandArray{};
+    int32_t ret;
+
+    SQLite::Database db(dbFile, SQLite::OPEN_READWRITE);
+
+    /*
+    "[transactionId] INTEGER PRIMARY KEY NOT NULL,"
+    "[type] TEXT NOT NULL,"
+    "[from] INTEGER,"
+    "[to] INTEGER,"
+    "[description] TEXT,"
+    "[Amount] INTEGER NOT NULL,"
+    */
+
+    ret = std::snprintf(
+        commandArray.data(),
+        maxSqlCommandLen,
+        "SELECT transactionId, type, fromAcc, toAcc, description, amount, date FROM Transactions"
+        " WHERE fromAcc = %d OR toAcc = %d",
+        accountId,
+        accountId);
+
+    if(ret <= 0) {
+        return false;
+    }
+
+    std::cout << "Executed command: " << commandArray.data() << "\n";
+    SQLite::Statement query(db, commandArray.data());
+
+    while(query.executeStep()) {
+        std::pair<uuidType, Transaction> p;
+        std::string type = query.getColumn(1).getString();
+        uuidType from = query.getColumn(2).getInt();
+        uuidType to = query.getColumn(3).getInt();
+        std::string description = query.getColumn(4).getString();
+        double amount = query.getColumn(5).getDouble();
+        Datetime date = query.getColumn(6).getInt();
+
+        p.first = query.getColumn(0).getInt();
+        p.second = Transaction(date, from, to, description, type, amount);
+
+        outTransactionVector.push_back(p);
+    }
+
+    return (!outTransactionVector.size()) ? false : true;
+}
+
+bool update(uuidType transactionId, const Transaction& transaction)
+{
+    std::array<char, maxSqlCommandLen> commandArray{};
+    int32_t ret;
+    std::vector<std::pair<uuidType, Transaction>> transactionVector;
+    uuidType relatedAccount = transaction.from() ? transaction.from() : transaction.to();
+
+    if(!relatedAccount) {
+        return false;
+    }
+
+    SQLite::Database db(dbFile, SQLite::OPEN_READWRITE);
+
+    //"[type], [fromAcc], [toAcc], [description], [amount], [date]"
+    //"\"%s\", %d, %d, \"%s\", %lf, %ld"
+
+    ret = std::snprintf(commandArray.data(),
+                        maxSqlCommandLen,
+                        "UPDATE [Transactions]"
+                        "SET type = \"%s\","
+                        "fromAcc = \"%d\","
+                        "toAcc = \"%d\""
+                        "description = \"%s\""
+                        "amount = \"%lf\""
+                        "date = \"%ld\""
+                        "WHERE transactionId = %d",
+                        transaction.type().c_str(),
+                        transaction.from(),
+                        transaction.to(),
+                        transaction.description().c_str(),
+                        transaction.amount(),
+                        transaction.date().epoch(),
+                        transactionId);
+
+    if(ret <= 0) {
+        return false;
+    }
+
+    std::cout << "Executed update command: " << commandArray.data() << "\n";
+    db.exec(commandArray.data());
+
+    return true;
+}
+
+bool update(uuidType transactionId,
+            const Transaction& transaction,
+            std::pair<uuidType, Transaction>& outTransaction)
+{
+
+    std::vector<std::pair<uuidType, Transaction>> transactionVector;
+    uuidType relatedAccount = transaction.from() ? transaction.from() : transaction.to();
+
+    if(!relatedAccount) {
+        return false;
+    }
+
+    if(!update(transactionId, transaction)) {
+        return false;
+    }
+
+    if(!getByAccountId(relatedAccount, transactionVector)) {
+        return false;
+    }
+
+    outTransaction = transactionVector.back();
+
+    return true;
+}
+
+} // namespace Storage::TransactionMngr

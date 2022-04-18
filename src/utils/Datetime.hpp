@@ -27,32 +27,32 @@ public:
         return time_;
     }
 
-    bool operator==(const Datetime& d)
+    bool operator==(const Datetime& d) const
     {
         return time_ == d.time_;
     }
 
-    bool operator!=(const Datetime& d)
+    bool operator!=(const Datetime& d) const
     {
         return time_ != d.time_;
     }
 
-    bool operator<=(const Datetime& d)
+    bool operator<=(const Datetime& d) const
     {
         return time_ <= d.time_;
     }
 
-    bool operator<(const Datetime& d)
+    bool operator<(const Datetime& d) const
     {
         return time_ < d.time_;
     }
 
-    bool operator>=(const Datetime& d)
+    bool operator>=(const Datetime& d) const
     {
         return time_ >= d.time_;
     }
 
-    bool operator>(const Datetime& d)
+    bool operator>(const Datetime& d) const
     {
         return time_ > d.time_;
     }

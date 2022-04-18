@@ -26,6 +26,9 @@ public:
                  const std::string& address,
                  const std::string& birthday);
 
+    friend bool operator==(const Customer&, const Customer&);
+    friend bool operator!=(const Customer&, const Customer&);
+
 private:
     // uuidType id_;
     std::string fullname_;

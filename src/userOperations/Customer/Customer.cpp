@@ -40,3 +40,14 @@ void Customer::setInfo(const std::string& fullname,
     birthday_ = birthday;
     email_ = email;
 }
+
+bool operator==(const Customer& lhs, const Customer& rhs)
+{
+    return lhs.email_ == rhs.email_ && lhs.address_ == rhs.address_ &&
+           lhs.birthday_ == rhs.birthday_ && lhs.fullname_ == rhs.fullname_;
+}
+
+bool operator!=(const Customer& lhs, const Customer& rhs)
+{
+    return !(lhs == rhs);
+}

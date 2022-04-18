@@ -112,3 +112,14 @@ bool Credentials::hash(std::string& s)
     s = picosha2::bytes_to_hex_string(hash.begin(), hash.end());
     return true;
 }
+
+bool operator==(const Credentials& lhs, const Credentials& rhs)
+{
+    return (lhs.username_.data() == rhs.username_.data()) &&
+           (lhs.password_.data() == rhs.password_.data());
+}
+
+bool operator!=(const Credentials& lhs, const Credentials& rhs)
+{
+    return !(lhs == rhs);
+}

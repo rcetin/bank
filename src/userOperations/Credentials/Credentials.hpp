@@ -23,6 +23,9 @@ public:
     bool isValid(void) const;
     bool isValid(std::ostream&) const;
 
+    friend bool operator==(const Credentials&, const Credentials&);
+    friend bool operator!=(const Credentials&, const Credentials&);
+
 private:
     bool hash(std::string&);
 
