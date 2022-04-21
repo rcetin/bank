@@ -116,7 +116,7 @@ bool Credentials::hash(std::string& s)
 bool operator==(const Credentials& lhs, const Credentials& rhs)
 {
     return (lhs.username_.data() == rhs.username_.data()) &&
-           (lhs.password_.data() == rhs.password_.data());
+           (lhs.passwordHash_ == rhs.passwordHash_);
 }
 
 bool operator!=(const Credentials& lhs, const Credentials& rhs)

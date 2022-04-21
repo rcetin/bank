@@ -16,7 +16,7 @@ TEST(BasicString, SuccessOnCorrectData)
 TEST(BasicString, FailsOnWrongData)
 {
     std::vector<StringInput> testVector = {
-        "test...", "test1", "123test", "*test", "tes-=t", "!test"};
+        "test...\\", "test1%", "123test$", "*test#", "tes-=#t", "!test"};
 
     for(auto str : testVector) {
         EXPECT_FALSE(str.isValid());

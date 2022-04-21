@@ -18,7 +18,7 @@ public:
 
     virtual bool isValid() const override
     {
-        const std::regex stringSchema{"[a-zA-Z\\s]+"};
+        const std::regex stringSchema{"[a-zA-Z0-9,.:;*@/\\s]+"};
         return std::regex_match(data_, stringSchema);
     }
 

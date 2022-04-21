@@ -18,6 +18,7 @@ public:
     std::string getCurrentOptionDescription(void);
     std::string getCurrentOperation(void);
     void dumpCurrentMenu(std::ostream&);
+    void reset(void);
 
     class SchemaError : public std::runtime_error
     {

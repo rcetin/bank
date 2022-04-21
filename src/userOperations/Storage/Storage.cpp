@@ -86,13 +86,12 @@ bool insert(const Customer& customer)
         return false;
     }
 
-    std::cout << "Executed command: " << commandArray.data() << "\n";
     db.exec(commandArray.data());
 
     return true;
 }
 
-bool insert(const Customer& customer, std::pair<uuidType, Customer>& outCustomerPair)
+bool insert(const Customer& customer, customerDbEntry& outCustomerPair)
 {
     if(!insert(customer)) {
         return false;
@@ -101,7 +100,7 @@ bool insert(const Customer& customer, std::pair<uuidType, Customer>& outCustomer
     return getByEmail(customer.email(), outCustomerPair);
 }
 
-bool getByEmail(const std::string& email, std::pair<uuidType, Customer>& outCustomerPair)
+bool getByEmail(const std::string& email, customerDbEntry& outCustomerPair)
 {
     std::array<char, maxSqlCommandLen> commandArray{};
     int32_t ret;
@@ -118,7 +117,6 @@ bool getByEmail(const std::string& email, std::pair<uuidType, Customer>& outCust
         return false;
     }
 
-    std::cout << "Executed command: " << commandArray.data() << "\n";
     SQLite::Statement query(db, commandArray.data());
 
     if(query.executeStep()) {
@@ -138,7 +136,7 @@ bool getByEmail(const std::string& email, std::pair<uuidType, Customer>& outCust
     return false;
 }
 
-bool getByUsername(const std::string& username, std::pair<uuidType, Customer>& outCustomerPair)
+bool getByUsername(const std::string& username, customerDbEntry& outCustomerPair)
 {
     std::array<char, maxSqlCommandLen> commandArray{};
     int32_t ret;
@@ -158,7 +156,6 @@ bool getByUsername(const std::string& username, std::pair<uuidType, Customer>& o
         return false;
     }
 
-    std::cout << "Executed command: " << commandArray.data() << "\n";
     SQLite::Statement query(db, commandArray.data());
 
     if(query.executeStep()) {
@@ -201,14 +198,11 @@ bool update(uuidType customerId, const Customer& customer)
         return false;
     }
 
-    std::cout << "Executed command: " << commandArray.data() << "\n";
     db.exec(commandArray.data());
     return true;
 }
 
-bool update(uuidType customerId,
-            const Customer& customer,
-            std::pair<uuidType, Customer>& outCustomerPair)
+bool update(uuidType customerId, const Customer& customer, customerDbEntry& outCustomerPair)
 {
     if(!update(customerId, customer)) {
         return false;
@@ -248,7 +242,6 @@ bool insert(const Credentials& credentials, int32_t customerId)
         return false;
     }
 
-    std::cout << "Executed command: " << commandArray.data() << "\n";
     db.exec(commandArray.data());
 
     return true;
@@ -256,7 +249,7 @@ bool insert(const Credentials& credentials, int32_t customerId)
 
 bool insert(const Credentials& credentials,
             int32_t customerId,
-            std::pair<uuidType, Credentials>& outCredentialPair)
+            credentialsDbEntry& outCredentialPair)
 {
     if(!insert(credentials, customerId)) {
         return false;
@@ -265,7 +258,7 @@ bool insert(const Credentials& credentials,
     return getByCustomerId(customerId, outCredentialPair);
 }
 
-bool getByCustomerId(int32_t customerId, std::pair<uuidType, Credentials>& outCredentialPair)
+bool getByCustomerId(int32_t customerId, credentialsDbEntry& outCredentialPair)
 {
     std::array<char, maxSqlCommandLen> commandArray{};
     int32_t ret;
@@ -282,7 +275,6 @@ bool getByCustomerId(int32_t customerId, std::pair<uuidType, Credentials>& outCr
         return false;
     }
 
-    std::cout << "Executed command: " << commandArray.data() << "\n";
     SQLite::Statement query(db, commandArray.data());
 
     if(query.executeStep()) {
@@ -298,7 +290,7 @@ bool getByCustomerId(int32_t customerId, std::pair<uuidType, Credentials>& outCr
     return false;
 }
 
-bool getByUsername(const std::string& username, std::pair<uuidType, Credentials>& outCredentialPair)
+bool getByUsername(const std::string& username, credentialsDbEntry& outCredentialPair)
 {
     std::array<char, maxSqlCommandLen> commandArray{};
     int32_t ret;
@@ -315,7 +307,6 @@ bool getByUsername(const std::string& username, std::pair<uuidType, Credentials>
         return false;
     }
 
-    std::cout << "Executed command: " << commandArray.data() << "\n";
     SQLite::Statement query(db, commandArray.data());
 
     if(query.executeStep()) {
@@ -359,9 +350,7 @@ bool update(uuidType id, const Credentials& credentials)
     return true;
 }
 
-bool update(uuidType id,
-            const Credentials& credentials,
-            std::pair<uuidType, Credentials>& outCredentialPair)
+bool update(uuidType id, const Credentials& credentials, credentialsDbEntry& outCredentialPair)
 {
     if(!update(id, credentials)) {
         return false;
@@ -407,9 +396,9 @@ bool insert(const Account& account, int32_t customerId)
     return true;
 }
 
-bool insert(const Account& account, int32_t customerId, std::pair<uuidType, Account>& outAccount)
+bool insert(const Account& account, int32_t customerId, accountDbEntry& outAccount)
 {
-    std::vector<std::pair<uuidType, Account>> accountVector;
+    std::vector<accountDbEntry> accountVector;
 
     if(!insert(account, customerId)) {
         return false;
@@ -424,8 +413,7 @@ bool insert(const Account& account, int32_t customerId, std::pair<uuidType, Acco
     return true;
 }
 
-bool getByCustomerId(int32_t customerId,
-                     std::vector<std::pair<uuidType, Account>>& outAccountVector)
+bool getByCustomerId(int32_t customerId, std::vector<accountDbEntry>& outAccountVector)
 {
     std::array<char, maxSqlCommandLen> commandArray{};
     int32_t ret;
@@ -442,11 +430,10 @@ bool getByCustomerId(int32_t customerId,
         return false;
     }
 
-    std::cout << "Executed command: " << commandArray.data() << "\n";
     SQLite::Statement query(db, commandArray.data());
 
     while(query.executeStep()) {
-        std::pair<uuidType, Account> p;
+        accountDbEntry p;
         uuidType ownerId = query.getColumn(1).getInt();
         double balance = query.getColumn(2).getDouble();
         time_t openDate = query.getColumn(3).getInt();
@@ -489,9 +476,9 @@ bool update(uuidType id, const Account& account)
     return true;
 }
 
-bool update(uuidType id, const Account& account, std::pair<uuidType, Account>& outAccountPair)
+bool update(uuidType id, const Account& account, accountDbEntry& outAccountPair)
 {
-    std::vector<std::pair<uuidType, Account>> accountVector;
+    std::vector<accountDbEntry> accountVector;
 
     if(!update(id, account)) {
         return false;
@@ -551,9 +538,9 @@ bool insert(const Transaction& transaction)
     return true;
 }
 
-bool insert(const Transaction& transaction, std::pair<uuidType, Transaction>& outTransaction)
+bool insert(const Transaction& transaction, transactionDbEntry& outTransaction)
 {
-    std::vector<std::pair<uuidType, Transaction>> transactionVector;
+    std::vector<transactionDbEntry> transactionVector;
     uuidType relatedAccount = transaction.from() ? transaction.from() : transaction.to();
 
     if(!relatedAccount) {
@@ -573,8 +560,7 @@ bool insert(const Transaction& transaction, std::pair<uuidType, Transaction>& ou
     return true;
 }
 
-bool getByAccountId(int32_t accountId,
-                    std::vector<std::pair<uuidType, Transaction>>& outTransactionVector)
+bool getByAccountId(int32_t accountId, std::vector<transactionDbEntry>& outTransactionVector)
 {
     std::array<char, maxSqlCommandLen> commandArray{};
     int32_t ret;
@@ -602,11 +588,10 @@ bool getByAccountId(int32_t accountId,
         return false;
     }
 
-    std::cout << "Executed command: " << commandArray.data() << "\n";
     SQLite::Statement query(db, commandArray.data());
 
     while(query.executeStep()) {
-        std::pair<uuidType, Transaction> p;
+        transactionDbEntry p;
         std::string type = query.getColumn(1).getString();
         uuidType from = query.getColumn(2).getInt();
         uuidType to = query.getColumn(3).getInt();
@@ -627,7 +612,7 @@ bool update(uuidType transactionId, const Transaction& transaction)
 {
     std::array<char, maxSqlCommandLen> commandArray{};
     int32_t ret;
-    std::vector<std::pair<uuidType, Transaction>> transactionVector;
+    std::vector<transactionDbEntry> transactionVector;
     uuidType relatedAccount = transaction.from() ? transaction.from() : transaction.to();
 
     if(!relatedAccount) {
@@ -669,10 +654,10 @@ bool update(uuidType transactionId, const Transaction& transaction)
 
 bool update(uuidType transactionId,
             const Transaction& transaction,
-            std::pair<uuidType, Transaction>& outTransaction)
+            transactionDbEntry& outTransaction)
 {
 
-    std::vector<std::pair<uuidType, Transaction>> transactionVector;
+    std::vector<transactionDbEntry> transactionVector;
     uuidType relatedAccount = transaction.from() ? transaction.from() : transaction.to();
 
     if(!relatedAccount) {

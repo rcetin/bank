@@ -1,8 +1,8 @@
-u,Unknown Menu,noOp
--l,Login,fnLogin
+u,Want to be customer,noOp
 -a,Account Operations,noOp
---o,Create Account,fnCreateAccount
+--o,Create Account,fnCreateCustomer
 c,Customer Menu,noOp
+-l,Login,fnLogin
 -a,Account Operations,noOp
 --o,Create Account,fnCreateAccount
 --d,Delete Account,fnDeleteAccount
@@ -10,5 +10,6 @@ c,Customer Menu,noOp
 --t,Account Details,fnAccountDetails
 -c,Customer Operations,noOp
 --e,Change Customer Information,fnChangeCustomerInfo
--l,Login Operations,noOp
+-x,Login Operations,noOp
 --e,Change Password,fnChangePassword
+q,Quit,fnQuit

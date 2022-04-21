@@ -98,7 +98,7 @@ TEST(CustomerStorageTest, createCustomer)
 {
     std::vector<Customer> customerVector;
     constexpr size_t customerCount = 10;
-    std::pair<uuidType, Customer> p;
+    Storage::CustomerMngr::customerDbEntry p;
 
     removeDb();
 
@@ -115,7 +115,7 @@ TEST(CustomerStorageTest, getCustomerByEmail)
     std::vector<Customer> customerVector;
     constexpr size_t customerCount = 10;
 
-    std::pair<uuidType, Customer> pInserted, pGot;
+    Storage::CustomerMngr::customerDbEntry pInserted, pGot;
 
     ASSERT_TRUE(createDummyCustomer(customerVector, customerCount));
     for(int i = 0; i < customerCount; ++i) {
@@ -133,8 +133,8 @@ TEST(CustomerStorageTest, getCustomerByUsername)
     std::vector<Customer> customerVector;
     constexpr size_t customerCount = 1;
 
-    std::pair<uuidType, Customer> pInserted, pGot;
-    std::pair<uuidType, Credentials> credInserted;
+    Storage::CustomerMngr::customerDbEntry pInserted, pGot;
+    Storage::CredentialsMngr::credentialsDbEntry credInserted;
 
     ASSERT_TRUE(createDummyCustomer(customerVector, customerCount));
     ASSERT_NO_THROW(ASSERT_TRUE(Storage::CustomerMngr::insert(customerVector.back(), pInserted)));
@@ -152,7 +152,7 @@ TEST(CustomerStorageTest, updateCustomer)
     constexpr size_t customerCount = 1;
     std::string updatedFullname = "Ramazan C";
     std::string updatedEmail = "ramco..1254@gmail.com";
-    std::pair<uuidType, Customer> pInserted, pGot, pUpdated;
+    Storage::CustomerMngr::customerDbEntry pInserted, pGot, pUpdated;
 
     ASSERT_TRUE(createDummyCustomer(customerVector, customerCount));
 
@@ -173,7 +173,7 @@ TEST(CredentialsStorageTest, createCredentials)
 {
     Credentials cred;
     uuidType id;
-    std::pair<uuidType, Credentials> credInserted;
+    Storage::CredentialsMngr::credentialsDbEntry credInserted;
     std::string username = "rmzn1254";
     std::string password = "GWerw1231..zxc!";
 
@@ -190,8 +190,8 @@ TEST(CredentialsStorageTest, getCredentialsByCustomerId)
     constexpr size_t customerCount = 1;
     std::string username = "customer.112";
     std::string password = "GASBcc2212..zxc!";
-    std::pair<uuidType, Customer> pInserted;
-    std::pair<uuidType, Credentials> credInserted, credGot;
+    Storage::CustomerMngr::customerDbEntry pInserted;
+    Storage::CredentialsMngr::credentialsDbEntry credInserted, credGot;
 
     ASSERT_TRUE(createDummyCustomer(customerVector, customerCount));
 
@@ -212,8 +212,8 @@ TEST(CredentialsStorageTest, getCredentialsByUsername)
     constexpr size_t customerCount = 1;
     std::string username = "customer.2";
     std::string password = "GASBcc2212..zxc!";
-    std::pair<uuidType, Customer> pInserted;
-    std::pair<uuidType, Credentials> credInserted, credGot;
+    Storage::CustomerMngr::customerDbEntry pInserted;
+    Storage::CredentialsMngr::credentialsDbEntry credInserted, credGot;
 
     ASSERT_TRUE(createDummyCustomer(customerVector, customerCount));
 
@@ -237,8 +237,8 @@ TEST(CredentialsStorageTest, updateCustomer)
     std::string updatedUsername = "customer.3.updated";
     std::string updatedPassword = "UpdatdPass12!a";
     Credentials updatedCred(updatedUsername, updatedPassword);
-    std::pair<uuidType, Customer> pInserted;
-    std::pair<uuidType, Credentials> credInserted, credGot, credUpdated;
+    Storage::CustomerMngr::customerDbEntry pInserted;
+    Storage::CredentialsMngr::credentialsDbEntry credInserted, credGot, credUpdated;
 
     ASSERT_TRUE(createDummyCustomer(customerVector, customerCount));
     ASSERT_TRUE(updatedCred.isValid(std::cout));
@@ -259,8 +259,8 @@ TEST(AccountStorageTest, createSingleAccount)
     std::vector<Account> accountVector;
     constexpr size_t accountCount = 1;
     constexpr size_t customerCount = 1;
-    std::pair<uuidType, Customer> cInserted;
-    std::pair<uuidType, Account> aInserted;
+    Storage::CustomerMngr::customerDbEntry cInserted;
+    Storage::AccountMngr::accountDbEntry aInserted;
 
     ASSERT_TRUE(createDummyCustomer(customerVector, customerCount));
     ASSERT_NO_THROW(ASSERT_TRUE(Storage::CustomerMngr::insert(customerVector.back(), cInserted)));
@@ -277,12 +277,12 @@ TEST(AccountStorageTest, getMultipleAccount)
 {
     std::vector<Customer> customerVector;
     std::vector<Account> accountVector;
-    constexpr size_t accountCount = 50;
+    constexpr size_t accountCount = 10;
     constexpr size_t customerCount = 1;
 
-    std::pair<uuidType, Customer> cInserted;
-    std::array<std::pair<uuidType, Account>, accountCount> accountDbVector;
-    std::vector<std::pair<uuidType, Account>> aGotVector;
+    Storage::CustomerMngr::customerDbEntry cInserted;
+    std::array<Storage::AccountMngr::accountDbEntry, accountCount> accountDbVector;
+    std::vector<Storage::AccountMngr::accountDbEntry> aGotVector;
 
     ASSERT_TRUE(createDummyCustomer(customerVector, customerCount));
     ASSERT_NO_THROW(ASSERT_TRUE(Storage::CustomerMngr::insert(customerVector.back(), cInserted)));
@@ -309,9 +309,9 @@ TEST(AccountStorageTest, updateAccount)
     constexpr size_t customerCount = 1;
     Account updated;
 
-    std::pair<uuidType, Customer> cInserted;
-    std::pair<uuidType, Account> aInserted, aUpdated;
-    std::vector<std::pair<uuidType, Account>> aGotVector;
+    Storage::CustomerMngr::customerDbEntry cInserted;
+    Storage::AccountMngr::accountDbEntry aInserted, aUpdated;
+    std::vector<Storage::AccountMngr::accountDbEntry> aGotVector;
 
     ASSERT_TRUE(createDummyCustomer(customerVector, customerCount));
     ASSERT_NO_THROW(ASSERT_TRUE(Storage::CustomerMngr::insert(customerVector.back(), cInserted)));
@@ -332,9 +332,9 @@ TEST(TransactionTest, createTransaction)
     std::vector<Account> accountVector;
     std::vector<Transaction> transactionVector;
 
-    std::pair<uuidType, Customer> cInserted;
-    std::pair<uuidType, Account> aInserted;
-    std::pair<uuidType, Transaction> txInserted;
+    Storage::CustomerMngr::customerDbEntry cInserted;
+    Storage::AccountMngr::accountDbEntry aInserted;
+    Storage::TransactionMngr::transactionDbEntry txInserted;
 
     ASSERT_TRUE(createDummyCustomer(customerVector, 1));
     ASSERT_NO_THROW(ASSERT_TRUE(Storage::CustomerMngr::insert(customerVector.back(), cInserted)));
@@ -355,17 +355,17 @@ TEST(TransactionTest, getTransaction)
 {
     constexpr size_t customerCount = 1;
     constexpr size_t accountCount = 2;
-    constexpr size_t transactionCount = 100;
+    constexpr size_t transactionCount = 20;
     std::vector<Customer> customerVector;
     std::vector<Account> accountVector;
 
-    std::vector<std::pair<uuidType, Account>> accountDbVector;
-    std::array<std::vector<std::pair<uuidType, Transaction>>, accountCount>
+    std::vector<Storage::AccountMngr::accountDbEntry> accountDbVector;
+    std::array<std::vector<Storage::TransactionMngr::transactionDbEntry>, accountCount>
         GetQueryTransactionDbVector;
     std::vector<Transaction> tmpTransactionVector;
     std::array<std::vector<Transaction>, accountCount> transactionVector;
 
-    std::pair<uuidType, Customer> cInserted;
+    Storage::CustomerMngr::customerDbEntry cInserted;
 
     ASSERT_TRUE(createDummyCustomer(customerVector, customerCount));
     ASSERT_NO_THROW(ASSERT_TRUE(Storage::CustomerMngr::insert(customerVector.back(), cInserted)));

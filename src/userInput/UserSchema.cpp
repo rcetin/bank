@@ -79,9 +79,7 @@ std::string UserSchema::getCurrentOperation(void)
 
 void UserSchema::dumpCurrentMenu(std::ostream& out)
 {
-    out << "[key] [Description]\n";
-    out << "-----------------------------\n";
-    out << "[" << currentParentMenuElem->data().key << "] ["
+    out << "\n[" << currentParentMenuElem->data().key << "] ["
         << currentParentMenuElem->data().description << "]\n";
 
     auto it = menuTree.getIteratorToChild(currentParentMenuElem);
@@ -167,4 +165,9 @@ bool UserSchema::parseSchemaLine(std::string& str, BankSchema& lineSchema)
     }
 
     return true;
+}
+
+void UserSchema::reset(void)
+{
+    currentParentMenuElem = menuTree.getRoot();
 }

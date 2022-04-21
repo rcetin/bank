@@ -18,6 +18,29 @@ public:
         : data_(std::string(1, charStr))
     { }
 
+    void set(const std::string& str)
+    {
+        data_ = str;
+    }
+    void set(const char* cstr)
+    {
+        data_ = cstr;
+    }
+    void set(char charStr)
+    {
+        data_ = std::string(1, charStr);
+    }
+
+    void clear()
+    {
+        data_.clear();
+    }
+
+    operator Type()
+    {
+        return static_cast<Type>(data_);
+    }
+
     virtual Type data() const = 0;
     virtual bool isValid() const = 0;
     virtual bool isValid(std::ostream&) const = 0;
