@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <unordered_map>
 
+#include <userInput/IntegerInput.hpp>
 #include <userInput/StringInput.hpp>
 #include <userOperations/Account/Account.hpp>
 #include <userOperations/Credentials/Credentials.hpp>
@@ -74,11 +75,8 @@ static bool getInput(std::istream& in,
 bool createCustomer(std::istream& in, std::ostream& out, Customer& customer)
 {
     StringInput fullname, email, address, birthday;
-    // std::string input, fullname, email, address, birthday;
-    // auto removeWhiteSpaceRegex = std::regex("^ +| +$|( ) +");
 
     std::cout << "Create Customer Details:\n\n";
-    // std::cout << "\nFullname, e-mail, address, birthday: ";
 
     if(!getInput(in, out, "Fullname: ", fullname) || !getInput(in, out, "Email: ", email) ||
        !getInput(in, out, "Address: ", address) ||
@@ -91,8 +89,10 @@ bool createCustomer(std::istream& in, std::ostream& out, Customer& customer)
     return true;
 }
 
-static bool
-getPasswordInput(std::ostream& out, const std::string& promptLog, PasswordInput& outPassword)
+static bool getPasswordInput(std::ostream& out,
+                             const std::string& promptLog,
+                             bool validate,
+                             PasswordInput& outPassword)
 {
     int32_t numberOfFails = 0;
     struct termios old_tio, new_tio;
@@ -132,7 +132,7 @@ getPasswordInput(std::ostream& out, const std::string& promptLog, PasswordInput&
         out << "\n";
 
         outPassword.set(passwordInput);
-        if(!outPassword.isValid()) {
+        if(validate && !outPassword.isValid(out)) {
             continue;
         }
 
@@ -152,7 +152,7 @@ bool createCredentials(std::istream& in, std::ostream& out, Credentials& credent
     std::cout << "Create Customer Credentials:\n\n";
 
     if(!getInput(in, out, "Username: ", username) ||
-       !getPasswordInput(out, "Password: ", password)) {
+       !getPasswordInput(out, "Password: ", true, password)) {
         goto quit;
     }
 
@@ -175,7 +175,7 @@ void fnLogin(UserOps& userOps)
 
     userOps.out() << "Login:\n\n";
     if(!getInput(userOps.in(), userOps.out(), "Username: ", username) ||
-       !getPasswordInput(userOps.out(), "Password: ", password)) {
+       !getPasswordInput(userOps.out(), "Password: ", false, password)) {
         userOps.out() << "Proper input is not entered, quitting...\n";
         quit();
     }
@@ -238,21 +238,116 @@ void fnCreateCustomer(UserOps& userOps)
     userOps.out() << "Please login to continue...\n";
 }
 
-void fnCreateAccount(UserOps& userOps) { }
-
-void fnDeleteAccount(UserOps&)
+void fnCreateAccount(UserOps& userOps)
 {
-    std::cout << "Call: fnDeleteAccount\n";
+    Account userAccount;
+
+    if(!userOps.user().isLoggedIn_) {
+        userOps.out() << "User is not logged in!\n";
+        quit();
+    }
+
+    userAccount.setAttributes(userOps.user().customer_.first, 0, Datetime::now());
+    if(!Storage::AccountMngr::insert(userAccount, userOps.user().customer_.first)) {
+        userOps.out() << "User account cannot be created.\n";
+        quit();
+    }
+
+    userOps.out() << "User account is created successfully.\n";
 }
 
-void fnListAccounts(UserOps&)
+void fnDeleteAccount(UserOps& userOps)
 {
-    std::cout << "Call: fnListAccounts\n";
+    IntegerInput accountIdx;
+    StringInput input;
+    std::vector<Storage::AccountMngr::accountDbEntry> accountList;
+    size_t idx = 0;
+
+    if(!userOps.user().isLoggedIn_) {
+        userOps.out() << "User is not logged in!\n";
+        quit();
+    }
+
+    if(!Storage::AccountMngr::getByCustomerId(userOps.user().customer_.first, accountList)) {
+        userOps.out() << "Database operation error.\n";
+        quit();
+    }
+
+    userOps.out() << "      Balance       Open Date\n";
+    for(auto& accountEntry : accountList) {
+        userOps.out() << "[" << idx++ << "]     " << accountEntry.second.balance() << "         "
+                      << accountEntry.second.openDate().dump();
+    }
+
+    if(!getInput(userOps.in(), userOps.out(), "Select account to delete: ", input)) {
+        userOps.out() << "Proper input is not entered, quitting...\n";
+        quit();
+    }
+
+    accountIdx.set(input.data());
+    if(!Storage::AccountMngr::del(accountList[accountIdx].first)) {
+        userOps.out() << "Database operation error.\n";
+        quit();
+    }
+
+    userOps.out() << "Account is deleted successfully\n";
 }
 
-void fnAccountDetails(UserOps&)
+void fnListAccounts(UserOps& userOps)
 {
-    std::cout << "Call: fnAccountDetails\n";
+    std::vector<Storage::AccountMngr::accountDbEntry> accountList;
+    size_t idx = 0;
+
+    if(!userOps.user().isLoggedIn_) {
+        userOps.out() << "User is not logged in!\n";
+        quit();
+    }
+
+    if(!Storage::AccountMngr::getByCustomerId(userOps.user().customer_.first, accountList)) {
+        userOps.out() << "Database operation error.\n";
+        quit();
+    }
+
+    userOps.out() << "      Balance       Open Date\n";
+    for(auto& accountEntry : accountList) {
+        userOps.out() << "[" << idx++ << "]     " << accountEntry.second.balance() << "         "
+                      << accountEntry.second.openDate().dump();
+    }
+}
+
+void fnAccountDetails(UserOps& userOps)
+{
+    IntegerInput accountIdx;
+    StringInput input;
+    std::vector<Storage::AccountMngr::accountDbEntry> accountList;
+    size_t idx = 0;
+
+    if(!userOps.user().isLoggedIn_) {
+        userOps.out() << "User is not logged in!\n";
+        quit();
+    }
+
+    if(!Storage::AccountMngr::getByCustomerId(userOps.user().customer_.first, accountList)) {
+        userOps.out() << "Database operation error.\n";
+        quit();
+    }
+
+    userOps.out() << "      Balance       Open Date\n";
+    for(auto& accountEntry : accountList) {
+        userOps.out() << "[" << idx++ << "]     " << accountEntry.second.balance() << "         "
+                      << accountEntry.second.openDate().dump();
+    }
+
+    if(!getInput(userOps.in(), userOps.out(), "Select account to delete: ", input)) {
+        userOps.out() << "Proper input is not entered, quitting...\n";
+        quit();
+    }
+
+    accountIdx.set(input.data());
+    userOps.out() << "Balance: " << accountList[accountIdx].second.balance()
+                  << "Open Date: " << accountList[accountIdx].second.openDate().dump() << "\n\n";
+
+    // @TODO: List transactions here
 }
 
 void fnChangeCustomerInfo(UserOps&)

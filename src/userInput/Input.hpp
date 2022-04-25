@@ -38,7 +38,7 @@ public:
 
     operator Type()
     {
-        return static_cast<Type>(data_);
+        return data();
     }
 
     virtual Type data() const = 0;

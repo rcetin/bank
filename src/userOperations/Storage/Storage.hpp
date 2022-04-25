@@ -42,6 +42,7 @@ bool insert(const Account& account, int32_t customerId, accountDbEntry&);
 bool getByCustomerId(int32_t customerId, std::vector<accountDbEntry>&);
 bool update(uuidType, const Account&);
 bool update(uuidType, const Account&, accountDbEntry&);
+bool del(uuidType id);
 
 } // namespace AccountMngr
 

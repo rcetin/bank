@@ -326,6 +326,30 @@ TEST(AccountStorageTest, updateAccount)
     ASSERT_EQ(updated, aUpdated.second);
 }
 
+TEST(AccountStorageTest, deleteAccount)
+{
+    std::vector<Customer> customerVector;
+    std::vector<Account> accountVector;
+    constexpr size_t accountCount = 1;
+    constexpr size_t customerCount = 1;
+    Account updated;
+
+    Storage::CustomerMngr::customerDbEntry cInserted;
+    Storage::AccountMngr::accountDbEntry aInserted;
+    std::vector<Storage::AccountMngr::accountDbEntry> aGotVector;
+
+    ASSERT_TRUE(createDummyCustomer(customerVector, customerCount));
+    ASSERT_NO_THROW(ASSERT_TRUE(Storage::CustomerMngr::insert(customerVector.back(), cInserted)));
+
+    ASSERT_TRUE(createDummyAccount(cInserted.first, accountVector, accountCount));
+    ASSERT_NO_THROW(ASSERT_TRUE(
+        Storage::AccountMngr::insert(accountVector.back(), cInserted.first, aInserted)));
+
+    ASSERT_NO_THROW(ASSERT_TRUE(Storage::AccountMngr::del(aInserted.first)));
+    ASSERT_NO_THROW(
+        ASSERT_FALSE(Storage::AccountMngr::getByCustomerId(cInserted.first, aGotVector)));
+}
+
 TEST(TransactionTest, createTransaction)
 {
     std::vector<Customer> customerVector;

@@ -493,6 +493,29 @@ bool update(uuidType id, const Account& account, accountDbEntry& outAccountPair)
     return true;
 }
 
+bool del(uuidType id)
+{
+    std::array<char, maxSqlCommandLen> commandArray{};
+    int32_t ret;
+
+    SQLite::Database db(dbFile, SQLite::OPEN_READWRITE);
+
+    ret = std::snprintf(commandArray.data(),
+                        maxSqlCommandLen,
+                        "DELETE  FROM [Accounts]"
+                        "WHERE accountId = %d",
+                        id);
+
+    if(ret <= 0) {
+        return false;
+    }
+
+    std::cout << "Executed delete command: " << commandArray.data() << "\n";
+    db.exec(commandArray.data());
+
+    return true;
+}
+
 } // namespace Storage::AccountMngr
 
 namespace Storage::TransactionMngr

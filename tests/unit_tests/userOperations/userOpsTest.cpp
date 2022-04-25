@@ -5,11 +5,11 @@
 #include <userOperations/Customer/Customer.hpp>
 #include <userOperations/UserOps.hpp>
 
-TEST(BasicUserOps, createCustomer)
-{
-    Customer c;
-    ASSERT_TRUE(createCustomer(std::cin, std::cout, c));
-}
+// TEST(BasicUserOps, createCustomer)
+// {
+//     Customer c;
+//     ASSERT_TRUE(createCustomer(std::cin, std::cout, c));
+// }
 
 // TEST(BasicUserOps, createCredentials)
 // {
