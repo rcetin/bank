@@ -16,6 +16,7 @@ public:
 
     void setAttributes(uuidType ownerId, double balance, const Datetime& openDate);
     void setOwnerId(uuidType);
+    void setBalance(double);
     uuidType ownerId() const;
     double balance() const;
     Datetime openDate() const;

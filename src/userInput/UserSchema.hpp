@@ -17,6 +17,7 @@ public:
     bool processUserInput(char);
     std::string getCurrentOptionDescription(void);
     std::string getCurrentOperation(void);
+    void goBack(void);
     void dumpCurrentMenu(std::ostream&);
     void reset(void);
 

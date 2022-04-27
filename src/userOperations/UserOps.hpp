@@ -5,6 +5,7 @@
 #include <string>
 #include <unordered_map>
 
+#include <userInput/UserSchema.hpp>
 #include <userOperations/Customer/Customer.hpp>
 #include <userOperations/Storage/Storage.hpp>
 
@@ -17,24 +18,21 @@ struct User
     Storage::CustomerMngr::customerDbEntry customer_;
     Storage::CredentialsMngr::credentialsDbEntry credentials_;
     std::vector<Storage::AccountMngr::accountDbEntry> accounts_;
-    std::vector<Storage::TransactionMngr::transactionDbEntry> transactions_;
 };
 
 class UserOps
 {
 public:
-    UserOps(std::istream& in, std::ostream& out)
+    UserOps(std::istream& in, std::ostream& out, UserSchema& schema)
         : in_(in)
         , out_(out)
+        , schema_(schema)
     { }
-    bool run(const std::string& op)
-    {
-        if(op == "noOp") {
-            return false;
-        }
 
+    void run(const std::string& op)
+    {
         ops.at(op)(*this);
-        return true;
+        return;
     }
 
     std::istream& in()
@@ -47,6 +45,11 @@ public:
         return out_;
     }
 
+    UserSchema& schema()
+    {
+        return schema_;
+    }
+
     User& user()
     {
         return user_;
@@ -56,6 +59,7 @@ private:
     static const std::unordered_map<std::string, void (*)(UserOps&)> ops;
     std::istream& in_;
     std::ostream& out_;
+    UserSchema& schema_;
     User user_;
 };
 

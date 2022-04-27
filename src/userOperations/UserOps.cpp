@@ -24,6 +24,11 @@ static void fnListAccounts(UserOps&);
 static void fnAccountDetails(UserOps&);
 static void fnChangeCustomerInfo(UserOps&);
 static void fnChangePassword(UserOps&);
+static void fnTransferMoney(UserOps& userOps);
+static void fnDepositMoney(UserOps& userOps);
+static void fnWithdrawMoney(UserOps& userOps);
+static void fnGoBack(UserOps& userOps);
+static void noOp(UserOps& userOps);
 
 constexpr int32_t maxNumberOfUserTrials = 5;
 
@@ -36,11 +41,28 @@ const std::unordered_map<std::string, void (*)(UserOps&)> UserOps::ops = {
     {"fnListAccounts", fnListAccounts},
     {"fnAccountDetails", fnAccountDetails},
     {"fnChangeCustomerInfo", fnChangeCustomerInfo},
-    {"fnChangePassword", fnChangePassword}};
+    {"fnChangePassword", fnChangePassword},
+    {"fnTransferMoney", fnTransferMoney},
+    {"fnDepositMoney", fnDepositMoney},
+    {"fnWithdrawMoney", fnWithdrawMoney},
+    {"fnGoBack", fnGoBack},
+    {"noOp", noOp}};
 
 static void quit()
 {
     std::exit(EXIT_SUCCESS);
+}
+
+static void goBackInMenu(size_t level, UserSchema& schema)
+{
+    for(size_t i = 0; i < level; ++i) {
+        schema.goBack();
+    }
+}
+
+static void goRootInMenu(UserSchema& schema)
+{
+    schema.reset();
 }
 
 template <typename Type>
@@ -164,12 +186,18 @@ quit:
     return false;
 }
 
+void fnGoBack(UserOps& userOps)
+{
+    goBackInMenu(2, userOps.schema());
+}
+
 void fnLogin(UserOps& userOps)
 {
     StringInput username;
     PasswordInput password;
     Storage::CredentialsMngr::credentialsDbEntry credEntry;
     Storage::CustomerMngr::customerDbEntry customerEntry;
+    std::vector<Storage::AccountMngr::accountDbEntry> accounts;
     Credentials cred;
     int32_t numberOfTrials = 0;
 
@@ -199,13 +227,23 @@ void fnLogin(UserOps& userOps)
     userOps.user().customer_ = customerEntry;
     userOps.user().credentials_ = credEntry;
 
+    if(Storage::AccountMngr::getByCustomerId(customerEntry.first, accounts)) {
+        userOps.user().accounts_ = accounts;
+    }
+
     userOps.out() << "Logged in successfully.\n";
+    userOps.schema().goBack();
 }
 
 void fnQuit(UserOps& userOps)
 {
     userOps.out() << "Quitting the application...\nHave a nice day!\n\n";
     quit();
+}
+
+void noOp(UserOps& userOps)
+{
+    return;
 }
 
 void fnCreateCustomer(UserOps& userOps)
@@ -236,6 +274,7 @@ void fnCreateCustomer(UserOps& userOps)
 
     userOps.out() << "Customer is created successfully.\n";
     userOps.out() << "Please login to continue...\n";
+    goRootInMenu(userOps.schema());
 }
 
 void fnCreateAccount(UserOps& userOps)
@@ -254,6 +293,7 @@ void fnCreateAccount(UserOps& userOps)
     }
 
     userOps.out() << "User account is created successfully.\n";
+    goBackInMenu(1, userOps.schema());
 }
 
 void fnDeleteAccount(UserOps& userOps)
@@ -276,7 +316,7 @@ void fnDeleteAccount(UserOps& userOps)
     userOps.out() << "      Balance       Open Date\n";
     for(auto& accountEntry : accountList) {
         userOps.out() << "[" << idx++ << "]     " << accountEntry.second.balance() << "         "
-                      << accountEntry.second.openDate().dump();
+                      << accountEntry.second.openDate().dump() << "\n";
     }
 
     if(!getInput(userOps.in(), userOps.out(), "Select account to delete: ", input)) {
@@ -291,12 +331,12 @@ void fnDeleteAccount(UserOps& userOps)
     }
 
     userOps.out() << "Account is deleted successfully\n";
+    goBackInMenu(1, userOps.schema());
 }
 
 void fnListAccounts(UserOps& userOps)
 {
     std::vector<Storage::AccountMngr::accountDbEntry> accountList;
-    size_t idx = 0;
 
     if(!userOps.user().isLoggedIn_) {
         userOps.out() << "User is not logged in!\n";
@@ -308,18 +348,20 @@ void fnListAccounts(UserOps& userOps)
         quit();
     }
 
-    userOps.out() << "      Balance       Open Date\n";
+    userOps.out() << "Account Id      Balance       Open Date\n";
     for(auto& accountEntry : accountList) {
-        userOps.out() << "[" << idx++ << "]     " << accountEntry.second.balance() << "         "
-                      << accountEntry.second.openDate().dump();
+        userOps.out() << "[" << accountEntry.first << "]             "
+                      << accountEntry.second.balance() << "         "
+                      << accountEntry.second.openDate().dump() << "\n";
     }
+    goBackInMenu(1, userOps.schema());
 }
 
 void fnAccountDetails(UserOps& userOps)
 {
     IntegerInput accountIdx;
-    StringInput input;
     std::vector<Storage::AccountMngr::accountDbEntry> accountList;
+    std::vector<Storage::TransactionMngr::transactionDbEntry> transactionList;
     size_t idx = 0;
 
     if(!userOps.user().isLoggedIn_) {
@@ -335,19 +377,27 @@ void fnAccountDetails(UserOps& userOps)
     userOps.out() << "      Balance       Open Date\n";
     for(auto& accountEntry : accountList) {
         userOps.out() << "[" << idx++ << "]     " << accountEntry.second.balance() << "         "
-                      << accountEntry.second.openDate().dump();
+                      << accountEntry.second.openDate().dump() << "\n";
     }
 
-    if(!getInput(userOps.in(), userOps.out(), "Select account to delete: ", input)) {
+    if(!getInput(userOps.in(), userOps.out(), "\nSelect account to show details: ", accountIdx) ||
+       accountIdx >= idx) {
         userOps.out() << "Proper input is not entered, quitting...\n";
         quit();
     }
 
-    accountIdx.set(input.data());
     userOps.out() << "Balance: " << accountList[accountIdx].second.balance()
-                  << "Open Date: " << accountList[accountIdx].second.openDate().dump() << "\n\n";
+                  << "\nOpen Date: " << accountList[accountIdx].second.openDate().dump() << "\n\n";
 
-    // @TODO: List transactions here
+    if(Storage::TransactionMngr::getByAccountId(accountList[accountIdx].first, transactionList)) {
+        userOps.out() << "Transactions:\n";
+        idx = 0;
+        for(auto& transaction : transactionList) {
+            userOps.out() << "[" << idx++ << "] " << transaction.second << "\n";
+        }
+    }
+
+    goBackInMenu(1, userOps.schema());
 }
 
 void fnChangeCustomerInfo(UserOps&)
@@ -358,4 +408,131 @@ void fnChangeCustomerInfo(UserOps&)
 void fnChangePassword(UserOps&)
 {
     std::cout << "Call: fnChangePassword\n";
+}
+
+void fnTransferMoney(UserOps& userOps)
+{
+    StringInput amountInput, description;
+    IntegerInput from, to;
+    double amount;
+    Storage::AccountMngr::accountDbEntry senderAccount, receiverAccount;
+
+    if(!userOps.user().isLoggedIn_) {
+        userOps.out() << "User is not logged in!\n";
+        quit();
+    }
+
+    std::cout << "Please enter transfer details:\n\n";
+
+    if(!getInput(userOps.in(), userOps.out(), "Sender Account Id: ", from) ||
+       !getInput(userOps.in(), userOps.out(), "Receiver Account Id: ", to) ||
+       !getInput(userOps.in(), userOps.out(), "Amount: ", amountInput) ||
+       !getInput(userOps.in(), userOps.out(), "Description: ", description)) {
+        userOps.out() << "Proper input is not entered, quitting...\n";
+        quit();
+    }
+
+    amount = std::stod(amountInput);
+    if(!Storage::AccountMngr::getByAccountId(from, senderAccount) ||
+       !Storage::AccountMngr::getByAccountId(to, receiverAccount) ||
+       senderAccount.second.ownerId() != userOps.user().customer_.first) {
+        userOps.out() << "Account could not be found.\n";
+        quit();
+    }
+
+    if(senderAccount.second.balance() < amount) {
+        userOps.out() << "Account balance is not enough. Balance: "
+                      << senderAccount.second.balance() << "\n";
+        quit();
+    }
+
+    Transaction tx(Datetime::now(), from, to, description, "transfer", amount);
+    if(!Storage::TransactionMngr::insert(tx)) {
+        userOps.out() << "Transaction cannot be stored.\n";
+        quit();
+    }
+
+    userOps.out() << "Transaction is completed successfully.\n";
+    goBackInMenu(1, userOps.schema());
+}
+
+void fnDepositMoney(UserOps& userOps)
+{
+    StringInput amountInput, description;
+    IntegerInput to;
+    double amount;
+    Storage::AccountMngr::accountDbEntry receiverAccount;
+
+    if(!userOps.user().isLoggedIn_) {
+        userOps.out() << "User is not logged in!\n";
+        quit();
+    }
+
+    std::cout << "Please enter deposit details:\n\n";
+
+    if(!getInput(userOps.in(), userOps.out(), "Account Id: ", to) ||
+       !getInput(userOps.in(), userOps.out(), "Amount: ", amountInput) ||
+       !getInput(userOps.in(), userOps.out(), "Description: ", description)) {
+        userOps.out() << "Proper input is not entered, quitting...\n";
+        quit();
+    }
+
+    amount = std::stod(amountInput);
+    if(!Storage::AccountMngr::getByAccountId(to, receiverAccount)) {
+        userOps.out() << "Account could not be found.\n";
+        quit();
+    }
+
+    Transaction tx(Datetime::now(), 0, to, description, "deposit", amount);
+    if(!Storage::TransactionMngr::insert(tx)) {
+        userOps.out() << "Transaction cannot be stored.\n";
+        quit();
+    }
+
+    userOps.out() << "Transaction is completed successfully.\n";
+    goBackInMenu(1, userOps.schema());
+}
+
+void fnWithdrawMoney(UserOps& userOps)
+{
+    StringInput amountInput, description;
+    IntegerInput from;
+    double amount;
+    Storage::AccountMngr::accountDbEntry senderAccount;
+
+    if(!userOps.user().isLoggedIn_) {
+        userOps.out() << "User is not logged in!\n";
+        quit();
+    }
+
+    std::cout << "Please enter withdraw details:\n\n";
+
+    if(!getInput(userOps.in(), userOps.out(), "Account Id: ", from) ||
+       !getInput(userOps.in(), userOps.out(), "Amount: ", amountInput) ||
+       !getInput(userOps.in(), userOps.out(), "Description: ", description)) {
+        userOps.out() << "Proper input is not entered, quitting...\n";
+        quit();
+    }
+
+    amount = std::stod(amountInput);
+    if(!Storage::AccountMngr::getByAccountId(from, senderAccount) ||
+       senderAccount.second.ownerId() != userOps.user().customer_.first) {
+        userOps.out() << "Account could not be found.\n";
+        quit();
+    }
+
+    if(senderAccount.second.balance() < amount) {
+        userOps.out() << "Account balance is not enough. Balance: "
+                      << senderAccount.second.balance() << "\n";
+        quit();
+    }
+
+    Transaction tx(Datetime::now(), from, 0, description, "withdraw", amount);
+    if(!Storage::TransactionMngr::insert(tx)) {
+        userOps.out() << "Transaction cannot be stored.\n";
+        quit();
+    }
+
+    userOps.out() << "Transaction is completed successfully.\n";
+    goBackInMenu(1, userOps.schema());
 }

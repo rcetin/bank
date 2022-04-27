@@ -24,6 +24,7 @@ public:
              const std::string& description,
              const std::string& type,
              double amount);
+    void setAmount(double);
 
     bool execute(void);
 

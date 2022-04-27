@@ -171,3 +171,13 @@ void UserSchema::reset(void)
 {
     currentParentMenuElem = menuTree.getRoot();
 }
+
+void UserSchema::goBack(void)
+{
+    auto node = menuTree.getParent(currentParentMenuElem);
+    if(node == nullptr) {
+        return;
+    }
+
+    currentParentMenuElem = node;
+}

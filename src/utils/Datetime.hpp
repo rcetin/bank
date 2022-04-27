@@ -14,7 +14,9 @@ public:
 
     std::string dump(void) const
     {
-        return std::string{std::asctime(std::localtime(&time_))};
+        std::string date{std::asctime(std::localtime(&time_))};
+        date.pop_back();
+        return date;
     }
 
     void set(std::time_t epoch)

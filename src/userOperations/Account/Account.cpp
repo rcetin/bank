@@ -31,6 +31,11 @@ void Account::setOwnerId(uuidType ownerId)
     ownerId_ = ownerId;
 }
 
+void Account::setBalance(double balance)
+{
+    balance_ = balance;
+}
+
 double Account::balance() const
 {
     return balance_;

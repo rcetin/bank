@@ -31,6 +31,11 @@ bool Transaction::set(const Datetime& date,
     return true;
 }
 
+void Transaction::setAmount(double amount)
+{
+    amount_ = amount;
+}
+
 Datetime Transaction::date() const
 {
     return date_;

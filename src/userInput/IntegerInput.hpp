@@ -18,7 +18,7 @@ public:
 
     virtual bool isValid() const override
     {
-        const std::regex positive{R"(^[1-9]{1}[0-9]+$)"};
+        const std::regex positive{R"(^[1-9]{1}[0-9]*$)"};
         const std::regex negative{R"(^-\d+$)"};
         const std::regex zero{R"(^0$)"};
 

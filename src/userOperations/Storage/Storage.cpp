@@ -447,6 +447,38 @@ bool getByCustomerId(int32_t customerId, std::vector<accountDbEntry>& outAccount
     return (!outAccountVector.size()) ? false : true;
 }
 
+bool getByAccountId(int32_t accountId, accountDbEntry& outAccount)
+{
+    std::array<char, maxSqlCommandLen> commandArray{};
+    int32_t ret;
+
+    SQLite::Database db(dbFile, SQLite::OPEN_READWRITE);
+
+    ret = std::snprintf(commandArray.data(),
+                        maxSqlCommandLen,
+                        "SELECT accountId, customerId, balance, openDate FROM Accounts"
+                        " WHERE accountId = %d",
+                        accountId);
+
+    if(ret <= 0) {
+        return false;
+    }
+
+    SQLite::Statement query(db, commandArray.data());
+
+    if(query.executeStep()) {
+        uuidType ownerId = query.getColumn(1).getInt();
+        double balance = query.getColumn(2).getDouble();
+        time_t openDate = query.getColumn(3).getInt();
+
+        outAccount.first = query.getColumn(0).getInt();
+        outAccount.second = Account(ownerId, balance, Datetime(openDate));
+        return true;
+    }
+
+    return false;
+}
+
 bool update(uuidType id, const Account& account)
 {
     std::array<char, maxSqlCommandLen> commandArray{};
@@ -524,6 +556,7 @@ bool insert(const Transaction& transaction)
 {
     std::array<char, maxSqlCommandLen> commandArray{};
     int32_t ret;
+    AccountMngr::accountDbEntry senderAccount, receiverAccount;
     uuidType relatedAccount = transaction.from() ? transaction.from() : transaction.to();
 
     if(!relatedAccount) {
@@ -534,6 +567,69 @@ bool insert(const Transaction& transaction)
     std::cout << "SQLite database file '" << db.getFilename().c_str() << "' opened successfully\n";
     db.exec(createTransactionTableCmd);
 
+    // Start transaction
+    SQLite::Transaction dbTransaction(db);
+
+    if(!transaction.type().compare("transfer")) {
+        if(!AccountMngr::getByAccountId(transaction.from(), senderAccount) ||
+           !AccountMngr::getByAccountId(transaction.to(), receiverAccount)) {
+            return false;
+        }
+
+        if(senderAccount.second.balance() < transaction.amount()) {
+            return false;
+        }
+
+        // Remove money from sender account
+        if(!AccountMngr::update(senderAccount.first,
+                                Account{senderAccount.second.ownerId(),
+                                        senderAccount.second.balance() - transaction.amount(),
+                                        senderAccount.second.openDate()})) {
+            return false;
+        }
+
+        // Add money to receiver
+        if(!AccountMngr::update(receiverAccount.first,
+                                Account{receiverAccount.second.ownerId(),
+                                        receiverAccount.second.balance() + transaction.amount(),
+                                        receiverAccount.second.openDate()})) {
+            return false;
+        }
+    }
+
+    if(!transaction.type().compare("withdraw")) {
+        if(!AccountMngr::getByAccountId(transaction.from(), senderAccount)) {
+            return false;
+        }
+
+        if(senderAccount.second.balance() < transaction.amount()) {
+            return false;
+        }
+
+        // Remove money from sender account
+        if(!AccountMngr::update(senderAccount.first,
+                                Account{senderAccount.second.ownerId(),
+                                        senderAccount.second.balance() - transaction.amount(),
+                                        senderAccount.second.openDate()})) {
+            return false;
+        }
+    }
+
+    if(!transaction.type().compare("deposit")) {
+        if(!AccountMngr::getByAccountId(transaction.to(), receiverAccount)) {
+            return false;
+        }
+
+        // Add money to receiver
+        if(!AccountMngr::update(receiverAccount.first,
+                                Account{receiverAccount.second.ownerId(),
+                                        receiverAccount.second.balance() + transaction.amount(),
+                                        receiverAccount.second.openDate()})) {
+            return false;
+        }
+    }
+
+    // Add transaction
     ret = std::snprintf(commandArray.data(),
                         maxSqlCommandLen,
                         "INSERT INTO [Transactions]"
@@ -557,6 +653,8 @@ bool insert(const Transaction& transaction)
 
     std::cout << "Insert command executed: " << commandArray.data() << "\n";
     db.exec(commandArray.data());
+
+    dbTransaction.commit();
 
     return true;
 }
@@ -631,6 +729,7 @@ bool getByAccountId(int32_t accountId, std::vector<transactionDbEntry>& outTrans
     return (!outTransactionVector.size()) ? false : true;
 }
 
+// @TODO: Should we update transaction??
 bool update(uuidType transactionId, const Transaction& transaction)
 {
     std::array<char, maxSqlCommandLen> commandArray{};

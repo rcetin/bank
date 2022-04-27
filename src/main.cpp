@@ -14,8 +14,8 @@ void welcome(void)
 int main(int argc, char const* argv[])
 {
     std::string input;
-    UserOps operation{std::cin, std::cout};
     UserSchema schema{default_schema};
+    UserOps operation{std::cin, std::cout, schema};
 
     welcome();
 
@@ -40,9 +40,7 @@ int main(int argc, char const* argv[])
             continue;
         }
 
-        if(operation.run(schema.getCurrentOperation())) {
-            schema.reset();
-        }
+        operation.run(schema.getCurrentOperation());
     }
 
     return 0;

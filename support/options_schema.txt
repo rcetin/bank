@@ -1,6 +1,8 @@
 u,Want to be customer,noOp
 -a,Account Operations,noOp
+-b,Back,fnGoBack
 --o,Create Account,fnCreateCustomer
+--b,Back,fnGoBack
 c,Customer Menu,noOp
 -l,Login,fnLogin
 -a,Account Operations,noOp
@@ -8,8 +10,15 @@ c,Customer Menu,noOp
 --d,Delete Account,fnDeleteAccount
 --l,List Accounts,fnListAccounts
 --t,Account Details,fnAccountDetails
+--b,Back,fnGoBack
 -c,Customer Operations,noOp
 --e,Change Customer Information,fnChangeCustomerInfo
+--t,Transfer Money,fnTransferMoney
+--d,Deposit Money,fnDepositMoney
+--w,Withdraw Money,fnWithdrawMoney
+--b,Back,fnGoBack
 -x,Login Operations,noOp
 --e,Change Password,fnChangePassword
+--b,Back,fnGoBack
+-b,Back,fnGoBack
 q,Quit,fnQuit

@@ -301,6 +301,35 @@ TEST(AccountStorageTest, getMultipleAccount)
     }
 }
 
+TEST(AccountStorageTest, getAccountByAccountId)
+{
+    std::vector<Customer> customerVector;
+    std::vector<Account> accountVector;
+    constexpr size_t accountCount = 10;
+    constexpr size_t customerCount = 1;
+
+    Storage::CustomerMngr::customerDbEntry cInserted;
+    std::array<Storage::AccountMngr::accountDbEntry, accountCount> accountDbVector;
+    Storage::AccountMngr::accountDbEntry aGotAccount;
+
+    ASSERT_TRUE(createDummyCustomer(customerVector, customerCount));
+    ASSERT_NO_THROW(ASSERT_TRUE(Storage::CustomerMngr::insert(customerVector.back(), cInserted)));
+
+    ASSERT_TRUE(createDummyAccount(cInserted.first, accountVector, accountCount));
+    for(size_t i = 0; i < accountCount; ++i) {
+        ASSERT_NO_THROW(ASSERT_TRUE(
+            Storage::AccountMngr::insert(accountVector[i], cInserted.first, accountDbVector[i])));
+    }
+
+    for(size_t i = 0; i < accountCount; ++i) {
+        ASSERT_NO_THROW(ASSERT_TRUE(
+            Storage::AccountMngr::getByAccountId(accountDbVector[i].first, aGotAccount)));
+
+        ASSERT_EQ(aGotAccount.first, accountDbVector[i].first);
+        ASSERT_EQ(aGotAccount.second, accountDbVector[i].second);
+    }
+}
+
 TEST(AccountStorageTest, updateAccount)
 {
     std::vector<Customer> customerVector;
@@ -350,7 +379,7 @@ TEST(AccountStorageTest, deleteAccount)
         ASSERT_FALSE(Storage::AccountMngr::getByCustomerId(cInserted.first, aGotVector)));
 }
 
-TEST(TransactionTest, createTransaction)
+TEST(TransactionTest, createTransactionSuccess)
 {
     std::vector<Customer> customerVector;
     std::vector<Account> accountVector;
@@ -373,6 +402,63 @@ TEST(TransactionTest, createTransaction)
 
     ASSERT_NE(txInserted.first, 0);
     ASSERT_EQ(transactionVector.back(), txInserted.second);
+}
+
+TEST(TransactionTest, createTransferTransactionFailDueToInsufficientAmount)
+{
+    std::vector<Customer> customerVector;
+    std::vector<Account> accountVector;
+    std::vector<Transaction> transactionVector;
+
+    Storage::CustomerMngr::customerDbEntry cInserted;
+    std::array<Storage::AccountMngr::accountDbEntry, 2> aInserted;
+    Storage::TransactionMngr::transactionDbEntry txInserted;
+
+    ASSERT_TRUE(createDummyCustomer(customerVector, 1));
+    ASSERT_NO_THROW(ASSERT_TRUE(Storage::CustomerMngr::insert(customerVector.back(), cInserted)));
+
+    ASSERT_TRUE(createDummyAccount(cInserted.first, accountVector, 2));
+    accountVector[0].setBalance(10.34);
+    ASSERT_NO_THROW(
+        ASSERT_TRUE(Storage::AccountMngr::insert(accountVector[0], cInserted.first, aInserted[0]) &&
+                    Storage::AccountMngr::insert(accountVector[1], cInserted.first, aInserted[1])));
+
+    ASSERT_TRUE(
+        createDummyTransaction(aInserted[0].first, aInserted[1].first, transactionVector, 1));
+    transactionVector.back().setAmount(250.10);
+
+    ASSERT_NO_THROW(
+        ASSERT_FALSE(Storage::TransactionMngr::insert(transactionVector.back(), txInserted)));
+
+    ASSERT_EQ(txInserted.first, 0);
+    ASSERT_NE(transactionVector.back(), txInserted.second);
+}
+
+TEST(TransactionTest, createWithdrawTransactionFailDueToInsufficientAmount)
+{
+    std::vector<Customer> customerVector;
+    std::vector<Account> accountVector;
+    std::vector<Transaction> transactionVector;
+
+    Storage::CustomerMngr::customerDbEntry cInserted;
+    Storage::AccountMngr::accountDbEntry aInserted;
+    Storage::TransactionMngr::transactionDbEntry txInserted;
+
+    ASSERT_TRUE(createDummyCustomer(customerVector, 1));
+    ASSERT_NO_THROW(ASSERT_TRUE(Storage::CustomerMngr::insert(customerVector.back(), cInserted)));
+
+    ASSERT_TRUE(createDummyAccount(cInserted.first, accountVector, 1));
+    accountVector[0].setBalance(10.34);
+    ASSERT_NO_THROW(ASSERT_TRUE(
+        Storage::AccountMngr::insert(accountVector.back(), cInserted.first, aInserted)));
+
+    ASSERT_TRUE(createDummyTransaction(aInserted.first, 0, transactionVector, 1));
+    transactionVector.back().setAmount(250.10);
+    ASSERT_NO_THROW(
+        ASSERT_FALSE(Storage::TransactionMngr::insert(transactionVector.back(), txInserted)));
+
+    ASSERT_EQ(txInserted.first, 0);
+    ASSERT_NE(transactionVector.back(), txInserted.second);
 }
 
 TEST(TransactionTest, getTransaction)
